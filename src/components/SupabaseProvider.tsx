@@ -1,68 +1,53 @@
-"use client";
+import { createContext, useContext, useMemo } from "react";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { Session, SupabaseClient } from "@supabase/supabase-js";
+import { useState } from "react";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import { supabase } from "../supabaseClient";
-import type { User, Session, AuthChangeEvent } from "@supabase/supabase-js";
-
-// Typ pro kontext
-type AuthCtx = {
-  user: User | null;
-  loading: boolean;
+type SupabaseContextType = {
+  supabase: SupabaseClient;
+  session: Session | null;
 };
 
-// Vytvoření kontextu s výchozími hodnotami
-const AuthContext = createContext<AuthCtx | undefined>(undefined);
+const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
 
-// Provider komponenta
-export const SupabaseAuthProvider = ({
+export function SupabaseAuthProvider({
   children,
+  initialSession = null,
 }: {
-  children: ReactNode;
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  children: React.ReactNode;
+  initialSession?: Session | null;
+}) {
+  const [supabase] = useState(() => createBrowserSupabaseClient());
+  const [session, setSession] = useState<Session | null>(initialSession);
 
-  useEffect(() => {
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data?.session?.user ?? null);
-      setLoading(false);
-    };
+  // Optionally, you can handle auth state changes here and update session
 
-    getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event: AuthChangeEvent, session: Session | null) => {
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const value = useMemo(
+    () => ({
+      supabase,
+      session,
+    }),
+    [supabase, session]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <SupabaseContext.Provider value={value}>
       {children}
-    </AuthContext.Provider>
+    </SupabaseContext.Provider>
   );
-};
+}
 
-// Hook pro přístup ke kontextu
-export const useAuth = (): AuthCtx => {
-  const context = useContext(AuthContext);
+export function useSupabase() {
+  const context = useContext(SupabaseContext);
   if (!context) {
-    throw new Error("useAuth must be used within a SupabaseAuthProvider");
+    throw new Error("useSupabase must be used within a SupabaseAuthProvider");
   }
   return context;
-};
+}
+
+import { useSessionContext } from "@supabase/auth-helpers-react";
+
+export function useAuth() {
+  const { session } = useSessionContext();
+  return { session, user: session?.user };
+}

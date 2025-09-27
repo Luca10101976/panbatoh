@@ -1,6 +1,6 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import "./globals.css";
-import Header from "./components/Header"; // správná relativní cesta
+import Header from "./components/Header"; // změněno z ../components/Header
 
 export const metadata = {
   title: "Pan Batoh",

@@ -1,26 +1,16 @@
-import "./globals.css";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Header from "./components/Header";
+import React from "react";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
-const inter = Inter({ subsets: ["latin"] });
+export default function AdminPage() {
+  const { isLoading, session } = useSessionContext();
 
-export const metadata: Metadata = {
-  title: "Pan Batoh",
-  description: "Marketplace průvodců a výletů",
-};
+  if (isLoading) return <p>⏳ Ověřuji přihlášení…</p>;
+  if (!session?.user) return <p>❌ Musíš se přihlásit</p>;
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
   return (
-    <html lang="cs">
-      <body className={inter.className}>
-        <Header />
-        {children}
-      </body>
-    </html>
+    <div>
+      <h1>Admin Dashboard</h1>
+      {/* Admin content goes here */}
+    </div>
   );
 }

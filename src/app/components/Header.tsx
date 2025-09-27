@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
 export default function Header() {
+  console.log("✅ Header komponenta byla načtena");
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function Header() {
             alt="Pan Batoh"
             className="h-8 w-8 rounded-md"
           />
-       <span className="text-red-500 font-bold text-lg">ZOBRAZUJE SE?</span>
+       <span className="text-[#0077B6] font-bold text-lg">Pan Batoh</span>
         </Link>
 
         {/* Menu */}

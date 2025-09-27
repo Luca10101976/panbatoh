@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo } from "react";
-import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
 import { useState } from "react";
 
@@ -17,10 +17,13 @@ export function SupabaseAuthProvider({
   children: React.ReactNode;
   initialSession?: Session | null;
 }) {
-  const [supabase] = useState(() => createBrowserSupabaseClient());
+  const [supabase] = useState(() =>
+    createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  );
   const [session, setSession] = useState<Session | null>(initialSession);
-
-  // Optionally, you can handle auth state changes here and update session
 
   const value = useMemo(
     () => ({
@@ -49,5 +52,7 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 
 export function useAuth() {
   const { session } = useSessionContext();
-  return { session, user: session?.user };
+  return { session, user: session?.user, loading: !session };
 }
+
+export default SupabaseAuthProvider;

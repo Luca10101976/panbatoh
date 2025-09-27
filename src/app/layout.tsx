@@ -1,16 +1,19 @@
-import React from "react";
-import { useSessionContext } from "@supabase/auth-helpers-react";
+import { ReactNode } from "react";
+import "./globals.css";
+import Header from "./components/Header"; // správná relativní cesta
 
-export default function AdminPage() {
-  const { isLoading, session } = useSessionContext();
+export const metadata = {
+  title: "Pan Batoh",
+  description: "Portál průvodců a cestovatelů",
+};
 
-  if (isLoading) return <p>⏳ Ověřuji přihlášení…</p>;
-  if (!session?.user) return <p>❌ Musíš se přihlásit</p>;
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      {/* Admin content goes here */}
-    </div>
+    <html lang="cs">
+      <body>
+        <Header />
+        {children}
+      </body>
+    </html>
   );
 }

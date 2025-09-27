@@ -47,7 +47,7 @@ export default function Header() {
             alt="Pan Batoh"
             className="h-8 w-8 rounded-md"
           />
-          <span className="text-red-500 font-bold text-lg">TEST FUNGUJE</span>
+       <span className="text-red-500 font-bold text-lg">ZOBRAZUJE SE?</span>
         </Link>
 
         {/* Menu */}

@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
 import "./globals.css";
-
-import { SupabaseAuthProvider } from "../components/SupabaseProvider";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Header from "./components/Header";
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Pan Batoh",
-  description: "Objevuj s průvodci – Pan Batoh",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  description: "Marketplace průvodců a výletů",
 };
 
 export default function RootLayout({
@@ -17,15 +17,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="cs">
-      <head />
-      <body className="bg-[#F5F5F5] text-[#333333] font-sans antialiased">
-        <SupabaseAuthProvider>
-          {/* Hlavička webu */}
-          <Header />
-
-          {/* Obsah stránky */}
-          <main className="min-h-screen">{children}</main>
-        </SupabaseAuthProvider>
+      <body className={inter.className}>
+        <Header />
+        {children}
       </body>
     </html>
   );

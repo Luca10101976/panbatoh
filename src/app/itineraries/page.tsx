@@ -3,7 +3,7 @@
 import { useSessionContext } from "@supabase/auth-helpers-react";
 
 export default function AdminPage() {
-  const { session, isLoading } = useSessionContext();
+  const { isLoading, session } = useSessionContext();
 
   if (isLoading) return <p>⏳ Ověřuji přihlášení…</p>;
   if (!session) return <p>❌ Musíš se přihlásit</p>;

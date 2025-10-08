@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import type { Database } from "@/types/supabase";
 
 // ✅ Vytvoříme vlastní SupabaseContext (náhrada za SessionContextProvider)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const SupabaseContext = createContext<any>(null);
 
 export function Providers({ children }: { children: ReactNode }) {

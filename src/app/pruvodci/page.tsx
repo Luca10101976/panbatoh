@@ -4,16 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import GlobalHero from "../components/GlobalHero";
 import { supabase } from "../../supabaseClient";
+import type { Database } from "@/types/supabase";
 
-type Guide = {
-  id: number;
-  name: string;
-  countries: string;
-  description: string | null;
-  photograph: string | null;
-  languages: string;
-  experience: string;
-};
+// Typ podle DB
+type Guide = Database["public"]["Tables"]["guides"]["Row"];
 
 const LANGUAGES = [
   "čeština",
@@ -36,7 +30,7 @@ const EXPERIENCES = [
 
 export default function GuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([]);
-  const [avatars, setAvatars] = useState<Record<number, string>>({});
+  const [avatars, setAvatars] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
@@ -48,20 +42,15 @@ export default function GuidesPage() {
 
     let query = supabase
       .from("public_published_guides")
-      .select(
-        "id, name, countries, description, photograph, languages, experience"
-      );
+      .select("*"); // bere všechny sloupce z view
 
     if (search) {
-      console.log("🔍 Filtruju podle search:", search);
       query = query.or(`name.ilike.%${search}%,countries.ilike.%${search}%`);
     }
     if (language) {
-      console.log("🔍 Filtruju podle jazyka:", language);
       query = query.ilike("languages", `%${language}%`);
     }
     if (experience) {
-      console.log("🔍 Filtruju podle zkušenosti:", experience);
       query = query.ilike("experience", `%${experience}%`);
     }
 
@@ -71,36 +60,31 @@ export default function GuidesPage() {
       console.error("❌ Chyba při načítání průvodců:", error);
       setGuides([]);
     } else {
-      console.log("✅ Data z DB:", data);
       setGuides(data || []);
 
-      setTimeout(async () => {
-        const urls = await Promise.all(
-          (data || []).map(async (g) => {
-            const photo = g.photograph;
+      // fotky
+      const urls = await Promise.all(
+        (data || []).map(async (g) => {
+          const photo = g.profile_image;
+          if (!photo) return [g.id, "/hero.jpg"] as const;
+          if (photo.startsWith("http")) return [g.id, photo] as const;
 
-            if (!photo) return [g.id, "/hero.jpg"] as const;
+          try {
+            const res = await fetch("/api/sign-url", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ path: photo, expiresIn: 3600 }),
+            });
+            if (!res.ok) throw new Error("sign failed");
+            const { url } = await res.json();
+            return [g.id, url || "/hero.jpg"] as const;
+          } catch {
+            return [g.id, "/hero.jpg"] as const;
+          }
+        })
+      );
 
-            if (photo.startsWith("http")) {
-              return [g.id, photo] as const;
-            }
-
-            try {
-              const res = await fetch("/api/sign-url", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ path: photo, expiresIn: 3600 }),
-              });
-              if (!res.ok) throw new Error("sign failed");
-              const { url } = await res.json();
-              return [g.id, url || "/hero.jpg"] as const;
-            } catch {
-              return [g.id, "/hero.jpg"] as const;
-            }
-          })
-        );
-        setAvatars(Object.fromEntries(urls));
-      }, 0);
+      setAvatars(Object.fromEntries(urls));
     }
 
     setLoading(false);
@@ -112,10 +96,7 @@ export default function GuidesPage() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <GlobalHero
-        title="Průvodci"
-        subtitle="Najdi svého průvodce pro cestu snů"
-      />
+      <GlobalHero title="Průvodci" subtitle="Najdi svého průvodce pro cestu snů" />
 
       <div className="max-w-6xl mx-auto -mt-8 relative z-20">
         <div className="bg-white border border-[#8ECAE6] rounded-xl shadow p-4 flex flex-col md:flex-row gap-4">
@@ -167,13 +148,15 @@ export default function GuidesPage() {
               >
                 <img
                   src={avatars[guide.id] || "/hero.jpg"}
-                  alt={guide.name}
+                  alt={guide.name ?? "Průvodce"}
                   className="w-24 h-24 rounded-full object-cover border-2 border-[#8ECAE6] mb-4"
                 />
                 <h2 className="text-lg font-bold text-[#0077B6]">
-                  {guide.name}
+                  {guide.name ?? "Neznámý průvodce"}
                 </h2>
-                <p className="text-sm text-gray-600 mb-2">{guide.countries}</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  {guide.countries || "Neznámá země"}
+                </p>
                 <p className="text-sm text-gray-500">
                   {guide.description || "Zkušený průvodce"}
                 </p>

@@ -2,13 +2,16 @@ import { createSupabaseBrowserClient } from "@/utils/supabase/client";
 import type { Database } from "@/types/supabase";
 
 const supabase = createSupabaseBrowserClient();
-type Guide = Database["public"]["Tables"]["guides"]["Row"];
-export type { Guide };
+
+export type Guide = Database["public"]["Tables"]["guides"]["Row"] & {
+  countries: string;
+  description: string;
+};
 
 export async function getApprovedGuides(): Promise<Guide[]> {
   const { data, error } = await supabase
     .from("guides")
-    .select("id, name, profile_image, is_approved, created_at")
+    .select("*")
     .eq("is_approved", true);
 
   if (error) {
@@ -16,5 +19,9 @@ export async function getApprovedGuides(): Promise<Guide[]> {
     return [];
   }
 
-  return data || [];
+  return (data || []).map((g) => ({
+    ...g,
+    countries: g.countries ?? "",
+    description: g.description ?? "",
+  }));
 }

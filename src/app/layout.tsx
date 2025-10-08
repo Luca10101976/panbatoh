@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import type { ReactNode } from "react";
-import "./globals.css";
-import { Providers } from "./providers"; // použijeme náš Providers
+import "./globals.css"; // ✅ Opravená cesta!
+import { Providers } from "./providers";
 import Header from "./components/Header";
 
 export const metadata = {

@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -27,7 +27,14 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
-      router.push("/guide/dashboard"); // ✅ po přihlášení přesměrujeme na dashboard
+      const userEmail = data.user?.email ?? "";
+
+      const adminEmails = ["lejnarova.lucie@gmail.com"]; // ⬅️ zde můžeš přidat další adminy
+      if (adminEmails.includes(userEmail)) {
+        router.push("/admin");
+      } else {
+        router.push("/guide/dashboard");
+      }
     }
   };
 

@@ -18,7 +18,7 @@ export default function Header() {
       const user = session?.user;
       if (user) {
         setUserEmail(user.email ?? null);
-        const adminEmails = ["lejnarova.lucie@gmail.com"];
+        const adminEmails = ["lejnarova.lucie@gmail.com"]; // můžeš sem přidat další
         setIsAdmin(adminEmails.includes(user.email ?? ""));
       }
     };
@@ -33,7 +33,7 @@ export default function Header() {
         <div className="flex items-center space-x-6">
           <Link href="/" className="flex items-center space-x-2">
             <Image
-              src="/panbatoh-logo.png" // ✅ MÁŠ HO V PUBLIC
+              src="/panbatoh-logo.png"
               alt="Pan Batoh logo"
               width={32}
               height={32}
@@ -53,15 +53,17 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Pravá část – admin a auth */}
+        {/* Pravá část – dashboard a auth */}
         <div className="flex items-center space-x-4">
           {userEmail ? (
             <>
-              {isAdmin && (
-                <Link href="/admin" className="hover:underline">
-                  Admin
-                </Link>
-              )}
+              <Link
+                href={isAdmin ? "/admin" : "/muj-dashboard"}
+                className="text-sm text-gray-700 hover:underline"
+              >
+                Můj dashboard
+              </Link>
+
               <button
                 onClick={() => supabase.auth.signOut()}
                 className="text-sm text-gray-700 hover:underline"

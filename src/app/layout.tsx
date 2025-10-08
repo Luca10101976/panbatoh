@@ -1,6 +1,8 @@
+// src/app/layout.tsx
 import type { ReactNode } from "react";
 import "./globals.css";
-import Header from "./components/Header"; // změněno z ../components/Header
+import { Providers } from "./providers"; // použijeme náš Providers
+import Header from "./components/Header";
 
 export const metadata = {
   title: "Pan Batoh",
@@ -11,8 +13,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="cs">
       <body>
-        <Header />
-        {children}
+        <Providers>
+          <Header />
+          {children}
+        </Providers>
       </body>
     </html>
   );

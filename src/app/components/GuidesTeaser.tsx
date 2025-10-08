@@ -1,14 +1,15 @@
 import GuideCard from "./GuideCard";
 
+// ⚠️ Nepoužíváme typ z databáze, ale vlastní jednodušší
 type Guide = {
   id: number;
   name: string;
   countries: string;
   description: string;
-  image: string;
+  profile_image: string;
 };
 
-export default function GuidesTeaser({ guides }: { guides: Guide[] }) {
+export default function GuidesTeaser({ guides = [] }: { guides?: Guide[] }) {
   return (
     <div className="max-w-6xl mx-auto px-4">
       <h2 className="text-3xl font-bold text-center mb-8">Naši průvodci</h2>
@@ -19,11 +20,11 @@ export default function GuidesTeaser({ guides }: { guides: Guide[] }) {
           {guides.map((g) => (
             <GuideCard
               key={g.id}
-              id={g.id}
+              id={String(g.id)}            // ⬅️ Oprava zde
               name={g.name}
               countries={g.countries}
               description={g.description}
-              image={g.image}
+              imageUrl={g.profile_image || "/hero.jpg"}
             />
           ))}
         </div>

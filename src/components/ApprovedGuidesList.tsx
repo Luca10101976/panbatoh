@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getApprovedGuides } from "@/lib/supabase/guides";
 import type { Database } from "@/types/supabase";
-import GuideCard from "../app/components/GuideCard"; // nebo správná cesta, např. "@/components/GuideCard"
+import GuideCard from "../app/components/GuideCard";
 
 type Guide = Database["public"]["Tables"]["guides"]["Row"];
 
@@ -29,8 +29,8 @@ export default function ApprovedGuidesList() {
           key={g.id}
           id={g.id}
           name={g.name}
-          countries={(g as any).countries ?? ""} // pokud nemáš countries ve sloupci
-          description={(g as any).description ?? ""}
+          countries={g.countries ?? ""}
+          description={g.description ?? ""}
           imageUrl={g.profile_image ?? "/hero.jpg"}
         />
       ))}

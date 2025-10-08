@@ -1,7 +1,9 @@
-import { createContext, useContext, useMemo } from "react";
+"use client";
+
+import { createContext, useContext, useMemo, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
-import { useState } from "react";
+import { useSessionContext } from "@supabase/auth-helpers-react";
 
 type SupabaseContextType = {
   supabase: SupabaseClient;
@@ -48,11 +50,7 @@ export function useSupabase() {
   return context;
 }
 
-import { useSessionContext } from "@supabase/auth-helpers-react";
-
 export function useAuth() {
   const { session } = useSessionContext();
   return { session, user: session?.user, loading: !session };
 }
-
-export default SupabaseAuthProvider;

@@ -7,7 +7,7 @@ type Guide = {
   id: string;
   name: string;
   countries?: string | string[] | null;
-  experience?: string | null; // ✅ přidáno
+  experience?: string | null;
   description?: string | null;
   focus?: string | null;
   languages?: string | null;
@@ -74,8 +74,12 @@ export default function GuidesGrid() {
           key={guide.id}
           id={guide.id}
           name={guide.name}
-          countries={guide.countries ?? ""}
-          experience={guide.experience ?? ""} // ✅ přidáno
+          countries={
+            Array.isArray(guide.countries)
+              ? guide.countries.join(", ")
+              : guide.countries ?? ""
+          }
+          experience={guide.experience ?? ""}
           focus={guide.focus ?? ""}
           description={guide.description ?? ""}
           languages={guide.languages ?? ""}

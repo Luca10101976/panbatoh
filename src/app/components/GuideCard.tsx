@@ -6,8 +6,9 @@ import Image from "next/image";
 type Props = {
   id: string;
   name: string;
-  countries: string;
+  countries: string | string[]; // ✅ umí obě varianty
   experience: string;
+  focus: string; // ✅ přidáno
   description: string;
   imageUrl: string;
   languages: string;
@@ -19,6 +20,7 @@ export default function GuideCard({
   name,
   countries,
   experience,
+  focus,
   description,
   imageUrl,
   languages,
@@ -26,11 +28,13 @@ export default function GuideCard({
 }: Props) {
   const safeImageUrl = imageUrl?.trim() || "/panbatoh-logo.png";
 
-  const renderInlineList = (label: string, value: string) => {
-    const items = value
-      ?.split(",")
-      .map((item) => item.trim())
-      .filter((item) => item.length > 0);
+  const renderInlineList = (label: string, value: string | string[]) => {
+    const items = Array.isArray(value)
+      ? value
+      : value
+          ?.split(",")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0);
 
     return (
       <p className="text-sm text-gray-700 mt-1 w-full text-left">
@@ -69,10 +73,11 @@ export default function GuideCard({
 
       {renderInlineList("Země", countries)}
       {renderInlineList("Zaměření", experience)}
+      {renderInlineList("Specializace", focus)}
 
       <p className="text-sm text-yellow-600 mt-1 w-full text-left">
         <strong>Recenze:</strong>{" "}
-        {rating !== null && rating !== undefined
+        {typeof rating === "number"
           ? `${rating.toFixed(1)} / 5 ⭐`
           : "Zatím bez hodnocení"}
       </p>

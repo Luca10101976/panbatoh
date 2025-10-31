@@ -68,6 +68,7 @@ export default function ProfilePage() {
   const [countries, setCountries] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [experiences, setExperiences] = useState<string[]>([]);
+  const [description, setDescription] = useState(""); // 🆕 přidáno
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [success, setSuccess] = useState(false);
@@ -107,6 +108,7 @@ export default function ProfilePage() {
         setCountries(profile.countries ? profile.countries.split(", ").filter(Boolean) : []);
         setLanguages(profile.languages ? profile.languages.split(", ").filter(Boolean) : []);
         setExperiences(profile.experience ? profile.experience.split(", ").filter(Boolean) : []);
+        setDescription(profile.description ?? ""); // 🆕 přidáno
       }
 
       setLoading(false);
@@ -162,7 +164,7 @@ export default function ProfilePage() {
       focus: experiences.join(", "),
       profile_image: finalPhotoUrl,
       photograph: finalPhotoUrl,
-      description: "",
+      description, // 🆕 přidáno
       content: "",
       approved: false,
       is_approved: false,
@@ -203,6 +205,16 @@ export default function ProfilePage() {
               className="border px-3 py-2 rounded w-full"
               value={name}
               onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-semibold text-[#0077B6]">Pár slov o sobě</label>
+            <textarea
+              className="border px-3 py-2 rounded w-full"
+              rows={4}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </div>
 

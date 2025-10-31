@@ -14,19 +14,22 @@ export default function Header() {
   useEffect(() => {
     const getUser = async () => {
       const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (error) {
-        console.error("Chyba při získávání uživatele:", error.message);
+      if (sessionError) {
+        console.error("Chyba při získávání session:", sessionError.message);
         return;
       }
 
+      const user = session?.user;
+
       if (user) {
-        setUserEmail(user.email ?? null);
+        const email = user.email ?? null;
+        setUserEmail(email);
         const adminEmails = ["zabaleny@panbatoh.cz"];
-        setIsAdmin(adminEmails.includes(user.email ?? ""));
+        setIsAdmin(email ? adminEmails.includes(email) : false);
       } else {
         setUserEmail(null);
         setIsAdmin(false);
@@ -90,14 +93,12 @@ export default function Header() {
                   Admin
                 </Link>
               )}
-
               <Link
                 href={isAdmin ? "/admin" : "/guide/dashboard"}
                 className="text-sm text-gray-700 hover:underline"
               >
                 Můj dashboard
               </Link>
-
               <button
                 onClick={handleLogout}
                 className="text-sm text-gray-700 hover:underline"

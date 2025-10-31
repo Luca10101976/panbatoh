@@ -2,217 +2,294 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
-import Image from "next/image"; // ✅ přidáno
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-type GuideProfile = {
-  id: number;
-  name: string;
-  description: string | null;
-  countries: string | null;
-  languages: string | null;
-  experience: string | null;
-  photograph: string | null;
+const CONTINENTS: { [key: string]: string[] } = {
+  Evropa: ["Česko", "Slovensko", "Polsko", "Německo", "Francie", "Španělsko", "Itálie", "Velká Británie"],
+  Asie: ["Čína", "Japonsko", "Thajsko", "Vietnam", "Indie"],
+  Afrika: ["Egypt", "Maroko", "Keňa", "JAR"],
+  Amerika: ["USA", "Kanada", "Mexiko", "Argentina", "Brazílie"],
+  Austrálie: ["Austrálie", "Nový Zéland"],
 };
 
-export default function GuideProfilePage() {
-  const [profile, setProfile] = useState<GuideProfile | null>(null);
+const LANGUAGES = [
+  "čeština", "angličtina", "němčina", "francouzština", "španělština", "italština",
+];
+
+const EXPERIENCES = [
+  "Turistika", "Památky", "Gastronomie", "Kultura", "Příroda", "Sport", "Wellness", "Dobrodružství",
+];
+
+function CheckboxGrid({
+  label,
+  options = [],
+  values,
+  setValues,
+}: {
+  label: string;
+  options?: string[];
+  values: string[];
+  setValues: (v: string[]) => void;
+}) {
+  return (
+    <div>
+      <label className="block mb-1 font-semibold">{label}</label>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+        {options.map((option) => (
+          <label key={option} className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={values.includes(option)}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setValues([...values, option]);
+                } else {
+                  setValues(values.filter((v) => v !== option));
+                }
+              }}
+            />
+            <span>{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ProfilePage() {
+  const router = useRouter();
+
+  const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [continent, setContinent] = useState("");
+  const [countries, setCountries] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [experiences, setExperiences] = useState<string[]>([]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoUrl, setPhotoUrl] = useState<string>("");
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Načtení profilu
   useEffect(() => {
-    const fetchProfile = async () => {
-      setLoading(true);
-      const { data: userData, error: userErr } = await supabase.auth.getUser();
-
-      if (userErr || !userData.user) {
-        setError("Musíte být přihlášen/a.");
-        setLoading(false);
+    const fetchUserAndProfile = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (error || !data.user) {
+        router.push("/login");
         return;
       }
 
-      const { data, error } = await supabase
+      if (!data.user.email_confirmed_at) {
+        alert("Nejdřív potvrď e-mail, který jsme ti poslali.");
+        router.push("/login");
+        return;
+      }
+
+      setUserId(data.user.id);
+      setEmail(data.user.email ?? "");
+
+      const { data: profile } = await supabase
         .from("guides")
         .select("*")
-        .eq("user_id", userData.user.id)
+        .eq("user_id", data.user.id)
         .maybeSingle();
 
-      if (error) {
-        setError(error.message);
-      } else {
-        setProfile(data ?? null);
+      if (profile) {
+        setProfileId(profile.id ?? null);
+        setName(profile.name ?? "");
+        setContinent(profile.destination ?? "");
+        setPhotoUrl(profile.profile_image || profile.photograph || "");
+        setCountries(profile.countries ? profile.countries.split(", ").filter(Boolean) : []);
+        setLanguages(profile.languages ? profile.languages.split(", ").filter(Boolean) : []);
+        setExperiences(profile.experience ? profile.experience.split(", ").filter(Boolean) : []);
       }
+
       setLoading(false);
     };
+    fetchUserAndProfile();
+  }, [router]);
 
-    fetchProfile();
-  }, []);
-
-  // Uložení změn
-  const handleSave = async () => {
-    if (!profile) return;
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccess(false);
     setSaving(true);
 
-    const { error } = await supabase
-      .from("guides")
-      .update({
-        name: profile.name,
-        description: profile.description,
-        countries: profile.countries,
-        languages: profile.languages,
-        experience: profile.experience,
-        photograph: profile.photograph,
-      })
-      .eq("id", profile.id);
-
-    setSaving(false);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      alert("✅ Změny uloženy!");
+    if (!userId || !email || !name || !continent || countries.length === 0 || languages.length === 0 || experiences.length === 0) {
+      setError("Vyplňte všechna pole.");
+      setSaving(false);
+      return;
     }
-  };
 
-  // Upload fotky
-  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      if (!profile) return;
-      const file = e.target.files?.[0];
-      if (!file) return;
+    let finalPhotoUrl = photoUrl;
 
+    if (photoFile) {
       setUploading(true);
-
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${profile.id}-${Date.now()}.${fileExt}`;
-      const filePath = `guide-profile-images/${fileName}`;
-
-      // Nahrajeme soubor
-      const { error: uploadErr } = await supabase.storage
+      const ext = photoFile.name.split(".").pop();
+      const fileName = `${userId}/profile.${ext}`;
+      const { error: uploadError } = await supabase.storage
         .from("guide-profile-images")
-        .upload(filePath, file, { upsert: true });
+        .upload(fileName, photoFile, { upsert: true });
 
-      if (uploadErr) throw uploadErr;
+      if (uploadError) {
+        setError("Chyba při nahrávání fotky: " + uploadError.message);
+        setUploading(false);
+        setSaving(false);
+        return;
+      }
 
-      // Získáme public URL
       const { data } = supabase.storage
         .from("guide-profile-images")
-        .getPublicUrl(filePath);
-
-      const publicUrl = data.publicUrl;
-
-      // Uložíme do DB
-      const { error: updateErr } = await supabase
-        .from("guides")
-        .update({ photograph: publicUrl })
-        .eq("id", profile.id);
-
-      if (updateErr) throw updateErr;
-
-      setProfile({ ...profile, photograph: publicUrl });
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Nastala neznámá chyba při nahrávání fotky.");
-      }
-    } finally {
+        .getPublicUrl(fileName);
+      finalPhotoUrl = data.publicUrl;
+      setPhotoUrl(finalPhotoUrl);
       setUploading(false);
+    }
+
+    const guideData: any = {
+      user_id: userId,
+      name,
+      email,
+      destination: continent,
+      countries: countries.join(", "),
+      languages: languages.join(", "),
+      experience: experiences.join(", "),
+      focus: experiences.join(", "),
+      profile_image: finalPhotoUrl,
+      photograph: finalPhotoUrl,
+      description: "",
+      content: "",
+      approved: false,
+      is_approved: false,
+    };
+
+    try {
+      let fullResp: any = null;
+
+      if (profileId) {
+        fullResp = await supabase.from("guides").update(guideData).eq("id", profileId).select();
+      } else {
+        fullResp = await supabase.from("guides").insert(guideData).select("id").single();
+        if (fullResp?.data?.id) setProfileId(fullResp.data.id);
+      }
+
+      if (fullResp?.error) {
+        setError("Chyba při ukládání profilu: " + fullResp.error.message);
+      } else {
+        setSuccess(true);
+      }
+    } catch (err: any) {
+      setError("Chyba při ukládání profilu: " + (err?.message || String(err)));
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <p className="p-6">⏳ Načítám editor…</p>;
-  if (error) return <p className="p-6 text-red-600">❌ {error}</p>;
-  if (!profile) return <p className="p-6">❗ Profil nebyl nalezen.</p>;
+  if (loading) return <p className="p-6">⏳ Načítám profil…</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold mb-4">Upravit profil</h1>
+    <div className="min-h-screen bg-[#F5F5F5] flex flex-col items-center justify-center py-12">
+      <div className="w-full max-w-3xl bg-white/90 backdrop-blur rounded-xl shadow-lg p-12 border border-[#8ECAE6]">
+        <form onSubmit={handleSave} className="space-y-6">
+          <div>
+            <label className="block mb-1 font-semibold text-[#0077B6]">Jméno</label>
+            <input
+              type="text"
+              className="border px-3 py-2 rounded w-full"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-      <div className="space-y-3">
-        <input
-          type="text"
-          value={profile.name}
-          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Jméno"
-        />
-        <textarea
-          value={profile.description ?? ""}
-          onChange={(e) =>
-            setProfile({ ...profile, description: e.target.value })
-          }
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Popis"
-        />
-        <input
-          type="text"
-          value={profile.countries ?? ""}
-          onChange={(e) =>
-            setProfile({ ...profile, countries: e.target.value })
-          }
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Země"
-        />
-        <input
-          type="text"
-          value={profile.languages ?? ""}
-          onChange={(e) =>
-            setProfile({ ...profile, languages: e.target.value })
-          }
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Jazyky"
-        />
-        <input
-          type="text"
-          value={profile.experience ?? ""}
-          onChange={(e) =>
-            setProfile({ ...profile, experience: e.target.value })
-          }
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Zkušenosti"
-        />
+          <div>
+            <label className="block mb-1 font-semibold text-[#0077B6]">Kontinent</label>
+            <select
+              className="border px-3 py-2 rounded w-full"
+              value={continent}
+              onChange={(e) => {
+                setContinent(e.target.value);
+                setCountries([]);
+              }}
+            >
+              <option value="">Vyberte kontinent</option>
+              {Object.keys(CONTINENTS).map((cont) => (
+                <option key={cont} value={cont}>
+                  {cont}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Upload fotky */}
-        <div>
-          <label className="block font-medium mb-1">Profilová fotka</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleUploadPhoto}
-            disabled={uploading}
-          />
-          {uploading && (
-            <p className="text-sm text-gray-500">⏳ Nahrávám fotku…</p>
-          )}
-          {profile.photograph && (
-            <Image
-              src={profile.photograph}
-              alt="Profilová fotka"
-              width={128} // ✅ povinné u <Image />
-              height={128}
-              className="w-32 h-32 object-cover rounded mt-2"
+          {continent && (
+            <CheckboxGrid
+              label="Země"
+              options={CONTINENTS[continent]}
+              values={countries}
+              setValues={setCountries}
             />
           )}
-        </div>
-      </div>
 
-      <div className="flex gap-2 mt-4">
-        <button
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          onClick={handleSave}
-          disabled={saving}
-        >
-          {saving ? "Ukládám…" : "💾 Uložit změny"}
-        </button>
-        <button
-          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-          onClick={() => (window.location.href = "/guide/dashboard")}
-        >
-          Zpět na dashboard
-        </button>
+          <CheckboxGrid
+            label="Jazyky"
+            options={LANGUAGES}
+            values={languages}
+            setValues={setLanguages}
+          />
+
+          <CheckboxGrid
+            label="Typ zážitku"
+            options={EXPERIENCES}
+            values={experiences}
+            setValues={setExperiences}
+          />
+
+          <div>
+            <label className="block mb-1 font-semibold text-[#0077B6]">Fotka</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="border px-3 py-2 rounded w-full"
+              onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+            />
+
+            {photoUrl ? (
+              <Image
+                src={photoUrl}
+                alt="Profilová fotka"
+                width={128}
+                height={128}
+                sizes="128px"
+                className="w-32 h-32 object-cover rounded mt-2"
+              />
+            ) : (
+              <p className="text-sm text-gray-500 mt-2">Žádná fotka zatím nahraná.</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="bg-[#FFB703] px-4 py-2 rounded font-bold hover:bg-[#40916C] transition"
+            disabled={saving}
+          >
+            {saving ? "Ukládám…" : "Uložit profil"}
+          </button>
+        </form>
+
+        {success && (
+          <div className="mt-4 text-[#40916C] font-semibold">
+            ✅ Profil uložen. Počkej na schválení adminem.
+          </div>
+        )}
+        {error && (
+          <div className="mt-4 text-[#F44336] font-semibold">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );

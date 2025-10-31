@@ -1,0 +1,19 @@
+
+> panbatoh-admin@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.3
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.100.163:3000
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1153ms
+ ✓ Compiled /_not-found in 466ms (809 modules)
+ HEAD /_next/image?url=%2Fplaceholder.jpg&w=256&q=75 404 in 598ms
+ ✓ Compiled / in 268ms (917 modules)
+ GET / 200 in 1318ms
+ ✓ Compiled /_not-found in 107ms (922 modules)
+ HEAD /placeholder.jpgcurl 404 in 208ms
+ HEAD /placeholder.jpgcurl 404 in 15ms
+ HEAD /placeholder.jpgcurl 404 in 15ms

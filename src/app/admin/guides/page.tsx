@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image"; // ✅ přidáno
+import Image from "next/image";
 import { supabase } from "../../../supabaseClient";
 
 type Guide = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   description: string | null;
   languages: string | null;
   experience: string | null;
-  countries: string | null;
-  photopath: string | null;
-  approved: boolean;
+  destination: string | null;
+  profile_image: string | null;
+  is_approved: boolean;
 };
 
 export default function GuidesAdminPage() {
@@ -21,12 +21,11 @@ export default function GuidesAdminPage() {
   const [loading, setLoading] = useState(true);
   const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
 
-  // načtení průvodců
   const fetchGuides = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("guides")
-      .select("id, name, email, description, languages, experience, countries, photopath, approved")
+      .select("id, name, email, description, languages, experience, destination, profile_image, is_approved")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -42,18 +41,17 @@ export default function GuidesAdminPage() {
     fetchGuides();
   }, []);
 
-  // změna stavu (schválit / zamítnout)
-  const toggleApproval = async (id: number, approved: boolean) => {
+  const toggleApproval = async (id: string, is_approved: boolean) => {
     const { error } = await supabase
       .from("guides")
-      .update({ approved })
+      .update({ is_approved })
       .eq("id", id);
 
     if (error) {
       console.error(error);
       alert("❌ Chyba při změně stavu průvodce");
     } else {
-      fetchGuides(); // refresh
+      fetchGuides();
     }
   };
 
@@ -79,7 +77,7 @@ export default function GuidesAdminPage() {
               <td className="p-2">{g.id}</td>
               <td className="p-2">{g.name}</td>
               <td className="p-2">{g.email}</td>
-              <td className="p-2">{g.approved ? "✅ Ano" : "❌ Ne"}</td>
+              <td className="p-2">{g.is_approved ? "✅ Ano" : "❌ Ne"}</td>
               <td className="p-2 space-x-2">
                 <button
                   onClick={() => setSelectedGuide(g)}
@@ -87,7 +85,7 @@ export default function GuidesAdminPage() {
                 >
                   Detail
                 </button>
-                {g.approved ? (
+                {g.is_approved ? (
                   <button
                     onClick={() => toggleApproval(g.id, false)}
                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -117,13 +115,13 @@ export default function GuidesAdminPage() {
           <p><strong>Popis:</strong> {selectedGuide.description}</p>
           <p><strong>Zkušenosti:</strong> {selectedGuide.experience}</p>
           <p><strong>Jazyky:</strong> {selectedGuide.languages}</p>
-          <p><strong>Země:</strong> {selectedGuide.countries}</p>
-          {selectedGuide.photopath && (
+          <p><strong>Země:</strong> {selectedGuide.destination}</p>
+          {selectedGuide.profile_image && (
             <Image
-              src={selectedGuide.photopath}
+              src={selectedGuide.profile_image}
               alt="Profilová fotka"
-              width={128}   // ✅ povinný width
-              height={128}  // ✅ povinný height
+              width={128}
+              height={128}
               className="mt-3 h-32 w-32 object-cover rounded shadow"
             />
           )}

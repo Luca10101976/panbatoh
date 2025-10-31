@@ -2,17 +2,18 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image"; // ✅ přidáno
+import Image from "next/image";
 import { supabase } from "../../../supabaseClient";
 
 type GuideProfile = {
-  id: number;
-  name: string;
+  id: string;
+  name: string | null;
   description: string | null;
   countries: string | null;
   languages: string | null;
   experience: string | null;
-  photograph: string | null;
+  focus: string | null;
+  profile_image: string | null;
 };
 
 export default function GuideDashboardPage() {
@@ -57,17 +58,28 @@ export default function GuideDashboardPage() {
       <h1 className="text-2xl font-bold mb-4">Můj profil</h1>
 
       <div className="border rounded p-4 bg-white shadow">
-        <p><strong>Jméno:</strong> {profile.name}</p>
+        <p><strong>Jméno:</strong> {profile.name ?? "—"}</p>
         <p><strong>Popis:</strong> {profile.description ?? "—"}</p>
         <p><strong>Země:</strong> {profile.countries ?? "—"}</p>
         <p><strong>Jazyky:</strong> {profile.languages ?? "—"}</p>
-        <p><strong>Zkušenosti:</strong> {profile.experience ?? "—"}</p>
 
-        {profile.photograph && (
+        {/* Typ zážitku s fallback logikou */}
+        <p>
+          <strong>Typy zážitků:</strong>{" "}
+          {profile.focus && profile.focus.trim() !== "" ? (
+            profile.focus
+          ) : profile.experience && profile.experience.trim() !== "" ? (
+            profile.experience
+          ) : (
+            <span className="text-gray-500">Neurčeno</span>
+          )}
+        </p>
+
+        {profile.profile_image && (
           <Image
-            src={profile.photograph}
+            src={profile.profile_image}
             alt="Profilová fotka"
-            width={128} // 32 * 4
+            width={128}
             height={128}
             className="w-32 h-32 object-cover rounded mt-3"
           />

@@ -58,13 +58,6 @@ export type Database = {
             foreignKeyName: "contact_requests_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "contact_requests_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -118,13 +111,6 @@ export type Database = {
             foreignKeyName: "guide_photos_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "guide_photos_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -140,106 +126,47 @@ export type Database = {
       guides: {
         Row: {
           approved: boolean | null
-          content: string | null
-          continent: string | null
-          countries: string | null
+          destination: string | null
           created_at: string | null
           description: string | null
-          destination: string | null
           email: string | null
           experience: string | null
-          focus: string | null
           id: string
           is_admin: boolean | null
           is_approved: boolean | null
           languages: string | null
           name: string | null
           photograph: string | null
-          profile_image: string | null
-          rating: number | null
           user_id: string | null
         }
         Insert: {
           approved?: boolean | null
-          content?: string | null
-          continent?: string | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
-          destination?: string | null
           email?: string | null
           experience?: string | null
-          focus?: string | null
           id?: string
           is_admin?: boolean | null
           is_approved?: boolean | null
           languages?: string | null
           name?: string | null
           photograph?: string | null
-          profile_image?: string | null
-          rating?: number | null
           user_id?: string | null
         }
         Update: {
           approved?: boolean | null
-          content?: string | null
-          continent?: string | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
-          destination?: string | null
           email?: string | null
           experience?: string | null
-          focus?: string | null
           id?: string
           is_admin?: boolean | null
           is_approved?: boolean | null
           languages?: string | null
           name?: string | null
           photograph?: string | null
-          profile_image?: string | null
-          rating?: number | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "guides_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      guides_focus_backup: {
-        Row: {
-          created_at: string | null
-          experience: string | null
-          focus: string | null
-          id: string | null
-          is_approved: boolean | null
-          name: string | null
-          profile_image: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          experience?: string | null
-          focus?: string | null
-          id?: string | null
-          is_approved?: boolean | null
-          name?: string | null
-          profile_image?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          experience?: string | null
-          focus?: string | null
-          id?: string | null
-          is_approved?: boolean | null
-          name?: string | null
-          profile_image?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -358,51 +285,6 @@ export type Database = {
           },
         ]
       }
-      my_guide_profile_backup: {
-        Row: {
-          approved: boolean | null
-          countries: string | null
-          created_at: string | null
-          description: string | null
-          email: string | null
-          experience: string | null
-          id: string | null
-          is_approved: boolean | null
-          languages: string | null
-          name: string | null
-          photograph: string | null
-          user_id: string | null
-        }
-        Insert: {
-          approved?: boolean | null
-          countries?: string | null
-          created_at?: string | null
-          description?: string | null
-          email?: string | null
-          experience?: string | null
-          id?: string | null
-          is_approved?: boolean | null
-          languages?: string | null
-          name?: string | null
-          photograph?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          approved?: boolean | null
-          countries?: string | null
-          created_at?: string | null
-          description?: string | null
-          email?: string | null
-          experience?: string | null
-          id?: string | null
-          is_approved?: boolean | null
-          languages?: string | null
-          name?: string | null
-          photograph?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -419,53 +301,37 @@ export type Database = {
           role?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       reviews: {
         Row: {
+          approved: boolean | null
           content: string
           created_at: string | null
           guide_id: string | null
           id: number
-          is_approved: boolean | null
           rating: number | null
           user_id: string | null
         }
         Insert: {
+          approved?: boolean | null
           content: string
           created_at?: string | null
           guide_id?: string | null
           id?: never
-          is_approved?: boolean | null
           rating?: number | null
           user_id?: string | null
         }
         Update: {
+          approved?: boolean | null
           content?: string
           created_at?: string | null
           guide_id?: string | null
           id?: never
-          is_approved?: boolean | null
           rating?: number | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       users: {
         Row: {
@@ -483,15 +349,7 @@ export type Database = {
           id?: string
           is_admin?: boolean | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "users_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
@@ -536,13 +394,6 @@ export type Database = {
             foreignKeyName: "guide_photos_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "guide_photos_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -558,7 +409,7 @@ export type Database = {
       admin_guides: {
         Row: {
           approved: boolean | null
-          countries: string | null
+          destination: string | null
           created_at: string | null
           description: string | null
           email: string | null
@@ -572,7 +423,7 @@ export type Database = {
         }
         Insert: {
           approved?: boolean | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
@@ -586,7 +437,7 @@ export type Database = {
         }
         Update: {
           approved?: boolean | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
@@ -598,15 +449,7 @@ export type Database = {
           photograph?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "guides_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       admin_itineraries: {
         Row: {
@@ -717,13 +560,6 @@ export type Database = {
             foreignKeyName: "contact_requests_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "contact_requests_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -763,25 +599,6 @@ export type Database = {
           id?: number | null
           rating?: number | null
           user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
-      incomplete_guides_view: {
-        Row: {
-          email: string | null
-          guide_id: string | null
-          is_approved: boolean | null
-          name: string | null
-          status: string | null
-          user_id: string | null
         }
         Relationships: []
       }
@@ -824,13 +641,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "guides"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contact_requests_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
           },
           {
             foreignKeyName: "contact_requests_guide_id_fkey"
@@ -889,13 +699,6 @@ export type Database = {
             foreignKeyName: "guide_photos_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "guide_photos_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -911,7 +714,7 @@ export type Database = {
       my_guide_profile: {
         Row: {
           approved: boolean | null
-          countries: string | null
+          destination: string | null
           created_at: string | null
           description: string | null
           email: string | null
@@ -925,7 +728,7 @@ export type Database = {
         }
         Insert: {
           approved?: boolean | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
@@ -939,7 +742,7 @@ export type Database = {
         }
         Update: {
           approved?: boolean | null
-          countries?: string | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
           email?: string | null
@@ -951,15 +754,7 @@ export type Database = {
           photograph?: string | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "guides_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       my_itineraries: {
         Row: {
@@ -1035,13 +830,6 @@ export type Database = {
             foreignKeyName: "contact_requests_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "contact_requests_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -1064,15 +852,7 @@ export type Database = {
           rating: number | null
           user_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "reviews_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       public_guide_photos: {
         Row: {
@@ -1115,13 +895,6 @@ export type Database = {
             foreignKeyName: "guide_photos_guide_id_fkey"
             columns: ["guide_id"]
             isOneToOne: false
-            referencedRelation: "incomplete_guides_view"
-            referencedColumns: ["guide_id"]
-          },
-          {
-            foreignKeyName: "guide_photos_guide_id_fkey"
-            columns: ["guide_id"]
-            isOneToOne: false
             referencedRelation: "my_guide_profile"
             referencedColumns: ["id"]
           },
@@ -1154,37 +927,37 @@ export type Database = {
       }
       public_published_guides: {
         Row: {
-          countries: string | null
+          approved: boolean | null
+          destination: string | null
           created_at: string | null
           description: string | null
-          destination: string | null
           experience: string | null
           id: string | null
           languages: string | null
           name: string | null
-          profile_image: string | null
+          photograph: string | null
         }
         Insert: {
-          countries?: string | null
+          approved?: boolean | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
-          destination?: string | null
           experience?: string | null
           id?: string | null
           languages?: string | null
           name?: string | null
-          profile_image?: string | null
+          photograph?: string | null
         }
         Update: {
-          countries?: string | null
+          approved?: boolean | null
+          destination?: string | null
           created_at?: string | null
           description?: string | null
-          destination?: string | null
           experience?: string | null
           id?: string | null
           languages?: string | null
           name?: string | null
-          profile_image?: string | null
+          photograph?: string | null
         }
         Relationships: []
       }

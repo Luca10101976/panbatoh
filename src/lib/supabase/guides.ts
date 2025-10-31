@@ -3,25 +3,17 @@ import type { Database } from "@/types/supabase";
 
 const supabase = createSupabaseBrowserClient();
 
-export type Guide = Database["public"]["Tables"]["guides"]["Row"] & {
-  countries: string;
-  description: string;
-};
+export type Guide = Database["public"]["Tables"]["public_published_guides"]["Row"];
 
 export async function getApprovedGuides(): Promise<Guide[]> {
   const { data, error } = await supabase
-    .from("guides")
-    .select("*")
-    .eq("is_approved", true);
+    .from("public_published_guides") // ✅ načítáme z view
+    .select("*");
 
   if (error) {
     console.error("Error fetching approved guides:", error.message);
     return [];
   }
 
-  return (data || []).map((g) => ({
-    ...g,
-    countries: g.countries ?? "",
-    description: g.description ?? "",
-  }));
+  return data ?? [];
 }

@@ -1,8 +1,8 @@
 // src/app/layout.tsx
 import type { ReactNode } from "react";
-import "./globals.css"; // ✅ Opravená cesta!
-import { Providers } from "./providers";
+import "./globals.css";
 import Header from "./components/Header";
+import { SupabaseAuthProvider } from "@/components/SupabaseProvider";
 
 export const metadata = {
   title: "Pan Batoh",
@@ -13,10 +13,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="cs">
       <body>
-        <Providers>
+        <SupabaseAuthProvider>
           <Header />
           {children}
-        </Providers>
+        </SupabaseAuthProvider>
       </body>
     </html>
   );

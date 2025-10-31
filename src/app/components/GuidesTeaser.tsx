@@ -1,35 +1,43 @@
+"use client";
+
 import GuideCard from "./GuideCard";
 
-// ✅ id jako string (odpovídá Supabase UUID)
+// ✅ Rozšířený typ Guide
 type Guide = {
-  id: string;
-  name: string;
-  countries: string;
-  description: string;
-  profile_image: string;
+  id?: string;
+  name?: string;
+  countries?: string;
+  description?: string;
+  profile_image?: string;
+  experience?: string;
+  languages?: string;
+  rating?: number;
 };
 
-export default function GuidesTeaser({ guides = [] }: { guides?: Guide[] }) {
-  return (
-    <div className="max-w-6xl mx-auto px-4">
-      <h2 className="text-3xl font-bold text-center mb-8">Naši průvodci</h2>
+type Props = {
+  guides: Guide[];
+};
 
-      {guides.length === 0 ? (
-        <p className="text-center">Zatím žádní průvodci</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {guides.map((g) => (
-            <GuideCard
-              key={g.id}
-              id={g.id}
-              name={g.name}
-              countries={g.countries}
-              description={g.description}
-              imageUrl={g.profile_image || "/hero.jpg"}
-            />
-          ))}
-        </div>
-      )}
+export default function GuidesTeaser({ guides }: Props) {
+  if (!guides.length) {
+    return <p className="text-center text-gray-500">Žádní průvodci nejsou k dispozici.</p>;
+  }
+console.log("🧭 Posílám průvodce do GuideCard:", guides);
+  return (
+    <div className="max-w-6xl mx-auto px-6 py-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {guides.map((guide) => (
+        <GuideCard
+          key={guide.id || ""}
+          id={guide.id || ""}
+          name={guide.name || "Neznámý průvodce"}
+          countries={guide.countries|| ""}
+          description={guide.description || ""}
+          experience={guide.experience || ""}
+          languages={guide.languages || ""}
+          rating={guide.rating ?? null}
+          imageUrl={guide.profile_image || "/placeholder.jpg"}
+        />
+      ))}
     </div>
   );
 }

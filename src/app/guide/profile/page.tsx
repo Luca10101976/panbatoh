@@ -116,7 +116,8 @@ export default function ProfilePage() {
     fetchUserAndProfile();
   }, [router]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  // ✅ 1. Opravený typ
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -153,7 +154,7 @@ export default function ProfilePage() {
       setUploading(false);
     }
 
-    const guideData: any = {
+    const guideData = {
       user_id: userId,
       name,
       email,
@@ -164,14 +165,14 @@ export default function ProfilePage() {
       focus: experiences.join(", "),
       profile_image: finalPhotoUrl,
       photograph: finalPhotoUrl,
-      description, // 🆕 přidáno
+      description,
       content: "",
       approved: false,
       is_approved: false,
     };
 
     try {
-      let fullResp: any = null;
+      let fullResp = null;
 
       if (profileId) {
         fullResp = await supabase.from("guides").update(guideData).eq("id", profileId).select();
@@ -185,8 +186,12 @@ export default function ProfilePage() {
       } else {
         setSuccess(true);
       }
-    } catch (err: any) {
-      setError("Chyba při ukládání profilu: " + (err?.message || String(err)));
+    } catch (err) {
+      if (err instanceof Error) {
+        setError("Chyba při ukládání profilu: " + err.message);
+      } else {
+        setError("Neznámá chyba při ukládání profilu.");
+      }
     } finally {
       setSaving(false);
     }
@@ -204,7 +209,7 @@ export default function ProfilePage() {
               type="text"
               className="border px-3 py-2 rounded w-full"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} // ✅ 2. Opravený typ
             />
           </div>
 
@@ -266,7 +271,9 @@ export default function ProfilePage() {
               type="file"
               accept="image/*"
               className="border px-3 py-2 rounded w-full"
-              onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setPhotoFile(e.target.files?.[0] || null)
+              } // ✅ 3. Opravený typ
             />
 
             {photoUrl ? (

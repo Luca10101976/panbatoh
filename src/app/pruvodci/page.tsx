@@ -4,9 +4,20 @@ import { useEffect, useState } from "react";
 import GuidesTeaser from "../components/GuidesTeaser";
 import GlobalHero from "../components/GlobalHero";
 import { supabase } from "../../supabaseClient";
-import type { Database } from "@/types/supabase";
 
-type Guide = Database["public"]["Tables"]["public_published_guides"]["Row"];
+// ✅ Typ odpovídající view public_published_guides
+type Guide = {
+  id: string;
+  name: string;
+  countries: string;
+  languages: string;
+  profile_image: string;
+  description: string;
+  created_at: string;
+  experience: string;
+  rating?: number | null;
+  focus?: string | null;
+};
 
 export default function GuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -23,7 +34,9 @@ export default function GuidesPage() {
 
       let query = supabase
         .from("public_published_guides")
-        .select("id, name, countries, languages, profile_image, description, created_at, experience, rating, focus");
+        .select(
+          "id, name, countries, languages, profile_image, description, created_at, experience, rating, focus"
+        );
 
       if (search) {
         query = query.or(`name.ilike.%${search}%,countries.ilike.%${search}%`);
@@ -47,10 +60,24 @@ export default function GuidesPage() {
 
       console.log("✅ Průvodci načteni:", data);
 
-      setGuides(data ?? []);
+      setGuides(
+        (data ?? []).map((g: any) => ({
+          id: g.id ?? "",
+          name: g.name ?? "",
+          countries: g.countries ?? "",
+          languages: g.languages ?? "",
+          profile_image: g.profile_image ?? "",
+          description: g.description ?? "",
+          created_at: g.created_at ?? "",
+          experience: g.experience ?? "",
+          rating: g.rating ?? null,
+          focus: g.focus ?? null,
+        }))
+      );
 
+      // načtení podepsaných URL fotek
       const urls = await Promise.all(
-        (data ?? []).map(async (g) => {
+        (data ?? []).map(async (g: any) => {
           const photo = g.profile_image;
           if (!photo) return [g.id, "/placeholder.jpg"] as const;
           if (photo.startsWith("http")) return [g.id, photo] as const;
@@ -76,7 +103,6 @@ export default function GuidesPage() {
     fetchGuides();
   }, [search, language, experience]);
 
-  // ❗ OPRAVA: countries a experience jsou vždy string
   const mappedGuides = guides.map((g) => ({
     ...g,
     profile_image: avatars[g.id] ?? g.profile_image ?? "/placeholder.jpg",
@@ -85,14 +111,12 @@ export default function GuidesPage() {
     languages: g.languages ?? "",
     description: g.description ?? "",
     rating: g.rating ?? null,
+    focus: g.focus ?? "",
   }));
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
-      <GlobalHero
-        title="Průvodci"
-        subtitle="Najdi svého průvodce pro cestu snů"
-      />
+      <GlobalHero title="Průvodci" subtitle="Najdi svého průvodce pro cestu snů" />
 
       <div className="max-w-6xl mx-auto -mt-8 relative z-20">
         <div className="bg-white border border-[#8ECAE6] rounded-xl shadow p-4 flex flex-col md:flex-row gap-4">
@@ -138,9 +162,7 @@ export default function GuidesPage() {
         {loading ? (
           <p className="text-center">⏳ Načítám průvodce...</p>
         ) : mappedGuides.length === 0 ? (
-          <p className="text-center text-gray-500">
-            Žádní průvodci nenalezeni.
-          </p>
+          <p className="text-center text-gray-500">Žádní průvodci nenalezeni.</p>
         ) : (
           <GuidesTeaser guides={mappedGuides} />
         )}

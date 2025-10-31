@@ -6,9 +6,9 @@ import GuideCard from "./GuideCard";
 type Guide = {
   id: string;
   name: string;
-  destination?: string | null;
+  countries?: string | string[] | null;
+  experience?: string | null; // ✅ přidáno
   description?: string | null;
-  destination?: string | null;
   focus?: string | null;
   languages?: string | null;
   rating?: number | null;
@@ -18,45 +18,55 @@ export default function GuidesGrid() {
   const [guides, setGuides] = useState<Guide[]>([]);
   const [images, setImages] = useState<Record<string, string>>({});
 
+  // ✅ Načtení průvodců
   useEffect(() => {
     async function fetchGuides() {
-      const res = await fetch("/api/guides"); // uprav podle svého backendu
-      const data = await res.json();
-      console.log("📦 Načtení průvodci:", data); // ✅ debug
-      setGuides(data);
+      try {
+        const res = await fetch("/api/guides");
+        if (!res.ok) throw new Error("Nepodařilo se načíst průvodce");
+        const data = await res.json();
+        console.log("📦 Načtení průvodci:", data);
+        setGuides(data);
+      } catch (error) {
+        console.error("❌ Chyba při načítání průvodců:", error);
+      }
     }
 
     fetchGuides();
   }, []);
 
+  // ✅ Načtení fotek průvodců
   useEffect(() => {
     async function fetchImages() {
       const urls: Record<string, string> = {};
 
       await Promise.all(
         guides.map(async (guide) => {
-          const res = await fetch("/api/sign-url", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              path: `guide-profile-images/${guide.id}/profile.png`,
-              expiresIn: 3600,
-            }),
-          });
+          try {
+            const res = await fetch("/api/sign-url", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                path: `guide-profile-images/${guide.id}/profile.png`,
+                expiresIn: 3600,
+              }),
+            });
 
-          const { url } = await res.json();
-          urls[guide.id] = url;
+            const { url } = await res.json();
+            urls[guide.id] = url;
+          } catch (error) {
+            console.warn(`⚠️ Nelze načíst obrázek pro průvodce ${guide.id}`);
+          }
         })
       );
 
       setImages(urls);
     }
 
-    if (guides.length > 0) {
-      fetchImages();
-    }
+    if (guides.length > 0) fetchImages();
   }, [guides]);
 
+  // ✅ Výpis karet průvodců
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {guides.map((guide) => (
@@ -64,12 +74,12 @@ export default function GuidesGrid() {
           key={guide.id}
           id={guide.id}
           name={guide.name}
-          destination={guide.destination}
-          description={guide.description}
-          destination={guide.destination}
-          focus={guide.focus}
-          languages={guide.languages}
-          rating={guide.rating}
+          countries={guide.countries ?? ""}
+          experience={guide.experience ?? ""} // ✅ přidáno
+          focus={guide.focus ?? ""}
+          description={guide.description ?? ""}
+          languages={guide.languages ?? ""}
+          rating={guide.rating ?? null}
           imageUrl={images[guide.id]}
         />
       ))}

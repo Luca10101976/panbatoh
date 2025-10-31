@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "../supabaseClient";
 
 export type ItineraryFormProps = {
-  onCreated?: (newId?: number) => void; // zůstává stejné
+  onCreated?: (newId?: number) => void;
 };
 
 export default function ItineraryForm({ onCreated }: ItineraryFormProps) {
@@ -52,9 +52,9 @@ export default function ItineraryForm({ onCreated }: ItineraryFormProps) {
 
   return (
     <div className="bg-white border rounded-xl shadow p-6">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">➕ Přidat nový itinerář</h3>
+      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">Přidat nový itinerář</h3>
 
-      {error && <p className="text-red-600 mb-3">❌ {error}</p>}
+      {error && <p className="text-red-600 mb-3">Chyba: {error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -85,7 +85,7 @@ export default function ItineraryForm({ onCreated }: ItineraryFormProps) {
           disabled={loading}
           className="w-full bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          {loading ? "Ukládám…" : "💾 Uložit itinerář"}
+          {loading ? "Ukládám…" : "Uložit itinerář"}
         </button>
       </form>
     </div>

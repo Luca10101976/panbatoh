@@ -3,9 +3,20 @@ import GlobalHero from "./components/GlobalHero";
 import Link from "next/link";
 import Image from "next/image";
 import GuidesTeaser from "./components/GuidesTeaser";
-import type { Database } from "@/types/supabase";
 
-type Guide = Database["public"]["Tables"]["public_published_guides"]["Row"];
+// ✅ Opravený typ — public_published_guides je VIEW, ne tabulka
+type Guide = {
+  id: string;
+  name: string;
+  countries: string;
+  languages: string;
+  profile_image: string;
+  description: string;
+  created_at: string;
+  experience: string;
+  rating?: number | null;
+  focus?: string | null;
+};
 
 export default async function HomePage() {
   const supabase = await createServerClientTyped();
@@ -34,8 +45,8 @@ export default async function HomePage() {
 
         if (signed?.signedUrl) {
           signedUrl = signed.signedUrl;
-        } else {
-          console.error("❌ Chyba při podepisování obrázku:", signError?.message);
+        } else if (signError) {
+          console.error("❌ Chyba při podepisování obrázku:", signError.message);
         }
       } else if (photo?.startsWith("http")) {
         signedUrl = photo;
@@ -54,7 +65,7 @@ export default async function HomePage() {
 
       {/* Boxy na hlavní stránce */}
       <div className="max-w-6xl mx-auto px-6 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {/* ... odkazy na sekce ... */}
+        {/* ✅ tady můžeš doplnit odkazy na sekce, pokud je budeš chtít */}
       </div>
 
       {/* ✅ Výpis schválených průvodců */}

@@ -5,8 +5,11 @@ import { getApprovedGuides } from "@/lib/supabase/guides";
 import type { Database } from "@/types/supabase";
 import GuideCard from "../app/components/GuideCard";
 
-// ✅ Typ odpovídá view `public_published_guides`
-type Guide = Database["public"]["Tables"]["public_published_guides"]["Row"];
+// ✅ Typ view + přidání rating a focus ručně, pokud chybí ve vygenerovaných typech
+type Guide = Database["public"]["Views"]["public_published_guides"]["Row"] & {
+  rating?: number | null;
+  focus?: string | null;
+};
 
 export default function ApprovedGuidesList() {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -50,6 +53,7 @@ export default function ApprovedGuidesList() {
           experience={g.experience ?? "Neuvedeno"}
           languages={g.languages ?? "Neuvedeno"}
           rating={g.rating ?? null}
+          focus={g.focus ?? "Neuvedeno"}
         />
       ))}
     </div>

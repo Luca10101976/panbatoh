@@ -5,7 +5,7 @@ import GuidesTeaser from "../components/GuidesTeaser";
 import GlobalHero from "../components/GlobalHero";
 import { supabase } from "../../supabaseClient";
 
-// ✅ Typ odpovídající view public_published_guides
+// Typ odpovídající view public_published_guides
 type Guide = {
   id: string;
   name: string;
@@ -32,23 +32,14 @@ export default function GuidesPage() {
     const fetchGuides = async () => {
       setLoading(true);
 
-      let query = supabase
+      const { data, error } = await supabase
         .from("public_published_guides")
         .select(
           "id, name, countries, languages, profile_image, description, created_at, experience, rating, focus"
-        );
-
-      if (search) {
-        query = query.or(`name.ilike.%${search}%,countries.ilike.%${search}%`);
-      }
-      if (language) {
-        query = query.ilike("languages", `%${language}%`);
-      }
-      if (experience) {
-        query = query.ilike("experience", `%${experience}%`);
-      }
-
-      const { data, error } = await query;
+        )
+        .or(search ? `name.ilike.%${search}%,countries.ilike.%${search}%` : "")
+        .ilike("languages", language ? `%${language}%` : "%")
+        .ilike("experience", experience ? `%${experience}%` : "%");
 
       if (error) {
         console.error("❌ Chyba při načítání průvodců:", error);
@@ -58,10 +49,9 @@ export default function GuidesPage() {
         return;
       }
 
-      console.log("✅ Průvodci načteni:", data);
-
+      // Mapování dat
       setGuides(
-        (data ?? []).map((g: any) => ({
+        (data ?? []).map((g) => ({
           id: g.id ?? "",
           name: g.name ?? "",
           countries: g.countries ?? "",
@@ -75,12 +65,14 @@ export default function GuidesPage() {
         }))
       );
 
-      // načtení podepsaných URL fotek
+      // Podepsané URL obrázků
       const urls = await Promise.all(
-        (data ?? []).map(async (g: any) => {
+        (data ?? []).map(async (g) => {
+          const id = g.id ?? "";
           const photo = g.profile_image;
-          if (!photo) return [g.id, "/placeholder.jpg"] as const;
-          if (photo.startsWith("http")) return [g.id, photo] as const;
+
+          if (!photo) return [id, "/placeholder.jpg"] as const;
+          if (photo.startsWith("http")) return [id, photo] as const;
 
           try {
             const res = await fetch("/api/sign-url", {
@@ -89,9 +81,9 @@ export default function GuidesPage() {
               body: JSON.stringify({ path: photo, expiresIn: 3600 }),
             });
             const { url } = await res.json();
-            return [g.id, url || "/placeholder.jpg"] as const;
+            return [id, url || "/placeholder.jpg"] as const;
           } catch {
-            return [g.id, "/placeholder.jpg"] as const;
+            return [id, "/placeholder.jpg"] as const;
           }
         })
       );
@@ -106,12 +98,6 @@ export default function GuidesPage() {
   const mappedGuides = guides.map((g) => ({
     ...g,
     profile_image: avatars[g.id] ?? g.profile_image ?? "/placeholder.jpg",
-    countries: g.countries ?? "",
-    experience: g.experience ?? "",
-    languages: g.languages ?? "",
-    description: g.description ?? "",
-    rating: g.rating ?? null,
-    focus: g.focus ?? "",
   }));
 
   return (

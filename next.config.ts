@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // ✅ Tohle zapne generování sourcemaps i v produkci:
+  productionBrowserSourceMaps: true,
 };
 
 export default nextConfig;

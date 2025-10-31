@@ -52,7 +52,6 @@ export default function ItinerariesAdminPage() {
     <div className="max-w-4xl mx-auto space-y-10">
       <h2 className="text-2xl font-bold">Správa itinerářů</h2>
 
-      {/* Formulář pro nový itinerář – po uložení refresh */}
       <ItineraryForm onCreated={fetchItineraries} />
 
       {itineraries.length === 0 ? (

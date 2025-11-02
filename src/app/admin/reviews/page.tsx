@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../../supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 
 type Review = {
   id: number;
@@ -29,7 +29,13 @@ export default function ReviewsAdminPage() {
       console.error(error);
       setReviews([]);
     } else {
-      setReviews(data || []);
+      // 🔧 Oprava typu místo "any"
+      setReviews(
+        (data || []).map((r: Record<string, unknown>) => ({
+          ...(r as Omit<Review, "approved">),
+          approved: r.is_approved as boolean,
+        }))
+      );
     }
     setLoading(false);
   };
@@ -42,7 +48,7 @@ export default function ReviewsAdminPage() {
   const toggleApproval = async (id: number, approved: boolean) => {
     const { error } = await supabase
       .from("reviews")
-      .update({ approved })
+      .update({ is_approved: approved }) // 🔧 správný název sloupce
       .eq("id", id);
 
     if (error) {

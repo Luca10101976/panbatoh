@@ -3,21 +3,12 @@
 import { useEffect, useState } from "react";
 import GuidesTeaser from "../components/GuidesTeaser";
 import GlobalHero from "../components/GlobalHero";
-import { supabase } from "../../supabaseClient";
+import { createSupabaseBrowserClient } from "@/lib/supabaseClient";
+import type { Database } from "@/types/supabase";
 
-// Typ odpovídající view public_published_guides
-type Guide = {
-  id: string;
-  name: string;
-  countries: string;
-  languages: string;
-  profile_image: string;
-  description: string;
-  created_at: string;
-  experience: string;
-  rating?: number | null;
-  focus?: string | null;
-};
+type Guide = Database["public"]["Views"]["public_published_guides"]["Row"];
+
+const supabase = createSupabaseBrowserClient();
 
 export default function GuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([]);
@@ -34,9 +25,7 @@ export default function GuidesPage() {
 
       const { data, error } = await supabase
         .from("public_published_guides")
-        .select(
-          "id, name, countries, languages, profile_image, description, created_at, experience, rating, focus"
-        )
+        .select("*")
         .or(search ? `name.ilike.%${search}%,countries.ilike.%${search}%` : "")
         .ilike("languages", language ? `%${language}%` : "%")
         .ilike("experience", experience ? `%${experience}%` : "%");
@@ -49,23 +38,8 @@ export default function GuidesPage() {
         return;
       }
 
-      // Mapování dat
-      setGuides(
-        (data ?? []).map((g) => ({
-          id: g.id ?? "",
-          name: g.name ?? "",
-          countries: g.countries ?? "",
-          languages: g.languages ?? "",
-          profile_image: g.profile_image ?? "",
-          description: g.description ?? "",
-          created_at: g.created_at ?? "",
-          experience: g.experience ?? "",
-          rating: g.rating ?? null,
-          focus: g.focus ?? null,
-        }))
-      );
+      setGuides(data ?? []);
 
-      // Podepsané URL obrázků
       const urls = await Promise.all(
         (data ?? []).map(async (g) => {
           const id = g.id ?? "";

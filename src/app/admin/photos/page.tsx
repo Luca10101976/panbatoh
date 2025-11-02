@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image"; // ✅ přidáno
-import { supabase } from "../../../supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 
 type Photo = {
   id: number;

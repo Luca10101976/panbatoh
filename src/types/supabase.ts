@@ -3,8 +3,8 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+  | { [key: string]: Json }
+  | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
@@ -1157,34 +1157,13 @@ export type Database = {
           countries: string | null
           created_at: string | null
           description: string | null
-          destination: string | null
           experience: string | null
+          focus: string | null
           id: string | null
           languages: string | null
           name: string | null
           profile_image: string | null
-        }
-        Insert: {
-          countries?: string | null
-          created_at?: string | null
-          description?: string | null
-          destination?: string | null
-          experience?: string | null
-          id?: string | null
-          languages?: string | null
-          name?: string | null
-          profile_image?: string | null
-        }
-        Update: {
-          countries?: string | null
-          created_at?: string | null
-          description?: string | null
-          destination?: string | null
-          experience?: string | null
-          id?: string | null
-          languages?: string | null
-          name?: string | null
-          profile_image?: string | null
+          rating: number | null
         }
         Relationships: []
       }

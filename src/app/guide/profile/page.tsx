@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../../supabaseClient";
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ""
+);
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -116,8 +120,7 @@ export default function ProfilePage() {
     fetchUserAndProfile();
   }, [router]);
 
-  // ✅ 1. Opravený typ
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -154,7 +157,7 @@ export default function ProfilePage() {
       setUploading(false);
     }
 
-    const guideData = {
+    const guideData: any = {
       user_id: userId,
       name,
       email,
@@ -165,14 +168,14 @@ export default function ProfilePage() {
       focus: experiences.join(", "),
       profile_image: finalPhotoUrl,
       photograph: finalPhotoUrl,
-      description,
+      description, // 🆕 přidáno
       content: "",
       approved: false,
       is_approved: false,
     };
 
     try {
-      let fullResp = null;
+      let fullResp: any = null;
 
       if (profileId) {
         fullResp = await supabase.from("guides").update(guideData).eq("id", profileId).select();
@@ -186,12 +189,8 @@ export default function ProfilePage() {
       } else {
         setSuccess(true);
       }
-    } catch (err) {
-      if (err instanceof Error) {
-        setError("Chyba při ukládání profilu: " + err.message);
-      } else {
-        setError("Neznámá chyba při ukládání profilu.");
-      }
+    } catch (err: any) {
+      setError("Chyba při ukládání profilu: " + (err?.message || String(err)));
     } finally {
       setSaving(false);
     }
@@ -209,7 +208,7 @@ export default function ProfilePage() {
               type="text"
               className="border px-3 py-2 rounded w-full"
               value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} // ✅ 2. Opravený typ
+              onChange={(e) => setName(e.target.value)}
             />
           </div>
 
@@ -271,9 +270,7 @@ export default function ProfilePage() {
               type="file"
               accept="image/*"
               className="border px-3 py-2 rounded w-full"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setPhotoFile(e.target.files?.[0] || null)
-              } // ✅ 3. Opravený typ
+              onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
             />
 
             {photoUrl ? (

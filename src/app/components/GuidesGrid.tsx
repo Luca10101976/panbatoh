@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import GuideCard from "./GuideCard";
+import GuideCard from "@/components/GuideCard";
 
 type Guide = {
   id: string;

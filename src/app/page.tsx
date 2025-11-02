@@ -3,20 +3,9 @@ import GlobalHero from "./components/GlobalHero";
 import Link from "next/link";
 import Image from "next/image";
 import GuidesTeaser from "./components/GuidesTeaser";
+import type { Database } from "@/types/supabase";
 
-// ✅ Opravený typ — public_published_guides je VIEW, ne tabulka
-type Guide = {
-  id: string;
-  name: string;
-  countries: string;
-  languages: string;
-  profile_image: string;
-  description: string;
-  created_at: string;
-  experience: string;
-  rating?: number | null;
-  focus?: string | null;
-};
+type Guide = Database["public"]["Views"]["public_published_guides"]["Row"];
 
 export default async function HomePage() {
   const supabase = await createServerClientTyped();
@@ -32,7 +21,6 @@ export default async function HomePage() {
 
   const guides = (data ?? []) as Guide[];
 
-  // ✅ Podepsat obrázky synchronně na serveru
   const signedGuides = await Promise.all(
     guides.map(async (g) => {
       const photo = g.profile_image;
@@ -63,12 +51,41 @@ export default async function HomePage() {
     <div className="min-h-screen bg-[#F5F5F5]">
       <GlobalHero title="Pan Batoh" subtitle="Objevuj svět s námi" />
 
-      {/* Boxy na hlavní stránce */}
       <div className="max-w-6xl mx-auto px-6 py-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {/* ✅ tady můžeš doplnit odkazy na sekce, pokud je budeš chtít */}
+        <Link
+          href="/pruvodci"
+          className="bg-white border border-[#8ECAE6] rounded-xl shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 mb-4 relative">
+            <Image src="/globe.svg" alt="Průvodci" fill className="object-contain" />
+          </div>
+          <h2 className="text-lg font-bold text-[#0077B6]">Průvodci</h2>
+          <p className="text-sm text-gray-600 mt-2">Najdi svého průvodce pro cestu snů.</p>
+        </Link>
+
+        <Link
+          href="/itinerare"
+          className="bg-white border border-[#8ECAE6] rounded-xl shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 mb-4 relative">
+            <Image src="/file.svg" alt="Itineráře" fill className="object-contain" />
+          </div>
+          <h2 className="text-lg font-bold text-[#0077B6]">Itineráře</h2>
+          <p className="text-sm text-gray-600 mt-2">Připrav si cestu krok za krokem.</p>
+        </Link>
+
+        <Link
+          href="/cesty"
+          className="bg-white border border-[#8ECAE6] rounded-xl shadow hover:shadow-lg transition p-6 flex flex-col items-center text-center"
+        >
+          <div className="w-16 h-16 mb-4 relative">
+            <Image src="/next.svg" alt="Cesty" fill className="object-contain" />
+          </div>
+          <h2 className="text-lg font-bold text-[#0077B6]">Cesty</h2>
+          <p className="text-sm text-gray-600 mt-2">Inspiruj se dobrodružstvími ostatních.</p>
+        </Link>
       </div>
 
-      {/* ✅ Výpis schválených průvodců */}
       {signedGuides.length > 0 ? (
         <GuidesTeaser guides={signedGuides} />
       ) : (

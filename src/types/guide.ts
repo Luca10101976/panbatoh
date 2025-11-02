@@ -1,0 +1,21 @@
+export type Guide = {
+  id: string;
+  name: string;
+  email?: string;
+  approved: boolean;
+  isApproved: boolean;
+  isAdmin: boolean;
+  countries: string[];
+  languages: string[];
+  experience: string[];
+  description?: string;
+  profileImage?: string;
+  photograph?: string;
+  userId?: string;
+  destination?: string;
+  focus?: string[];
+  rating?: number;
+  continent?: string;
+  content?: string;
+  createdAt?: string;
+};

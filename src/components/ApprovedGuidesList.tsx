@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { getApprovedGuides } from "@/lib/supabase/guides";
-import type { Database } from "@/types/supabase";
-import GuideCard from "../app/components/GuideCard";
+import GuideCard from "@/components/GuideCard";
+import type { Database } from "@/types/supabase"; // ✅ správný import
 
-// ✅ Typ view + přidání rating a focus ručně, pokud chybí ve vygenerovaných typech
+// Typ pro průvodce z view public_published_guides
 type Guide = Database["public"]["Views"]["public_published_guides"]["Row"] & {
   rating?: number | null;
   focus?: string | null;
@@ -17,22 +17,8 @@ export default function ApprovedGuidesList() {
   useEffect(() => {
     const fetchGuides = async () => {
       const data = await getApprovedGuides();
-
-      console.log("🧭 Načtení průvodci:", data);
-
-      if (data && data.length > 0) {
-        const first = data[0];
-        console.log("🧪 Debug průvodce:");
-        console.log("🌍 Země (countries):", first.countries);
-        console.log("🎯 Zaměření (experience):", first.experience);
-        console.log("📝 Popis:", first.description);
-        console.log("🗣️ Jazyky:", first.languages);
-        console.log("📷 Obrázek:", first.profile_image);
-      }
-
       setGuides(data ?? []);
     };
-
     fetchGuides();
   }, []);
 

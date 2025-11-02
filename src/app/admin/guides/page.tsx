@@ -2,38 +2,29 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { supabase } from "../../../supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
+import type { Database } from "@/types/supabase";
 
-type Guide = {
-  id: string;
-  name: string;
-  email: string;
-  description: string | null;
-  languages: string | null;
-  experience: string | null;
-  destination: string | null;
-  profile_image: string | null;
-  is_approved: boolean;
-};
+type GuideRow = Database["public"]["Tables"]["guides"]["Row"];
+type GuideUpdate = Database["public"]["Tables"]["guides"]["Update"];
 
 export default function GuidesAdminPage() {
-  const [guides, setGuides] = useState<Guide[]>([]);
+  const [guides, setGuides] = useState<GuideRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedGuide, setSelectedGuide] = useState<Guide | null>(null);
+  const [selectedGuide, setSelectedGuide] = useState<GuideRow | null>(null);
 
+  // ✅ Načtení všech průvodců
   const fetchGuides = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("guides")
-      .select("id, name, email, description, languages, experience, destination, profile_image, is_approved")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("guides").select("*");
 
     if (error) {
-      console.error(error);
+      console.error("Chyba při načítání průvodců:", error);
       setGuides([]);
     } else {
-      setGuides(data || []);
+      setGuides(data as GuideRow[]);
     }
+
     setLoading(false);
   };
 
@@ -41,15 +32,18 @@ export default function GuidesAdminPage() {
     fetchGuides();
   }, []);
 
-  const toggleApproval = async (id: string, is_approved: boolean) => {
+  // ✅ Schválení nebo zamítnutí průvodce
+  const toggleApproval = async (id: string, isApproved: boolean) => {
+    const updateData: GuideUpdate = { is_approved: isApproved };
+
     const { error } = await supabase
       .from("guides")
-      .update({ is_approved })
+      .update(updateData)
       .eq("id", id);
 
     if (error) {
-      console.error(error);
-      alert("❌ Chyba při změně stavu průvodce");
+      console.error("Chyba při schvalování:", error);
+      alert("❌ Chyba při schvalování průvodce");
     } else {
       fetchGuides();
     }
@@ -87,14 +81,14 @@ export default function GuidesAdminPage() {
                 </button>
                 {g.is_approved ? (
                   <button
-                    onClick={() => toggleApproval(g.id, false)}
+                    onClick={() => toggleApproval(g.id!, false)}
                     className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
                   >
                     Zamítnout
                   </button>
                 ) : (
                   <button
-                    onClick={() => toggleApproval(g.id, true)}
+                    onClick={() => toggleApproval(g.id!, true)}
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                   >
                     Schválit
@@ -106,7 +100,6 @@ export default function GuidesAdminPage() {
         </tbody>
       </table>
 
-      {/* Detail průvodce */}
       {selectedGuide && (
         <div className="mt-8 p-4 border rounded bg-gray-50">
           <h2 className="text-xl font-bold mb-3">Detail průvodce</h2>
@@ -116,6 +109,7 @@ export default function GuidesAdminPage() {
           <p><strong>Zkušenosti:</strong> {selectedGuide.experience}</p>
           <p><strong>Jazyky:</strong> {selectedGuide.languages}</p>
           <p><strong>Země:</strong> {selectedGuide.destination}</p>
+
           {selectedGuide.profile_image && (
             <Image
               src={selectedGuide.profile_image}

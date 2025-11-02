@@ -1,4 +1,4 @@
-import { supabase } from "../supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 
 export async function uploadAvatar(file: File, guideId: number) {
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase();

@@ -17,9 +17,7 @@ const CONTINENTS: { [key: string]: string[] } = {
   Austrálie: ["Austrálie", "Nový Zéland"],
 };
 
-const LANGUAGES = [
-  "čeština", "angličtina", "němčina", "francouzština", "španělština", "italština",
-];
+const LANGUAGES = ["čeština", "angličtina", "němčina", "francouzština", "španělština", "italština"];
 
 const EXPERIENCES = [
   "Turistika", "Památky", "Gastronomie", "Kultura", "Příroda", "Sport", "Wellness", "Dobrodružství",
@@ -72,7 +70,7 @@ export default function ProfilePage() {
   const [countries, setCountries] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
   const [experiences, setExperiences] = useState<string[]>([]);
-  const [description, setDescription] = useState(""); // 🆕 přidáno
+  const [description, setDescription] = useState("");
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [success, setSuccess] = useState(false);
@@ -112,7 +110,7 @@ export default function ProfilePage() {
         setCountries(profile.countries ? profile.countries.split(", ").filter(Boolean) : []);
         setLanguages(profile.languages ? profile.languages.split(", ").filter(Boolean) : []);
         setExperiences(profile.experience ? profile.experience.split(", ").filter(Boolean) : []);
-        setDescription(profile.description ?? ""); // 🆕 přidáno
+        setDescription(profile.description ?? "");
       }
 
       setLoading(false);
@@ -120,7 +118,7 @@ export default function ProfilePage() {
     fetchUserAndProfile();
   }, [router]);
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -157,7 +155,7 @@ export default function ProfilePage() {
       setUploading(false);
     }
 
-    const guideData: any = {
+    const guideData: Record<string, string | boolean> = {
       user_id: userId,
       name,
       email,
@@ -168,17 +166,18 @@ export default function ProfilePage() {
       focus: experiences.join(", "),
       profile_image: finalPhotoUrl,
       photograph: finalPhotoUrl,
-      description, // 🆕 přidáno
+      description,
       content: "",
       approved: false,
       is_approved: false,
     };
 
     try {
-      let fullResp: any = null;
+      // 🩵 Typizovaná verze bez any
+      let fullResp: { data: { id?: string } | null; error: { message: string } | null } | null = null;
 
       if (profileId) {
-        fullResp = await supabase.from("guides").update(guideData).eq("id", profileId).select();
+        fullResp = await supabase.from("guides").update(guideData).eq("id", profileId).select().single();
       } else {
         fullResp = await supabase.from("guides").insert(guideData).select("id").single();
         if (fullResp?.data?.id) setProfileId(fullResp.data.id);
@@ -189,8 +188,12 @@ export default function ProfilePage() {
       } else {
         setSuccess(true);
       }
-    } catch (err: any) {
-      setError("Chyba při ukládání profilu: " + (err?.message || String(err)));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError("Chyba při ukládání profilu: " + err.message);
+      } else {
+        setError("Chyba při ukládání profilu.");
+      }
     } finally {
       setSaving(false);
     }

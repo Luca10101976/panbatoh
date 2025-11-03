@@ -3,17 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabaseClient";
-import type { Database } from "@/types/supabase";
+import type { GuideRow } from "@/types/guide"; // ✅ nový typ
 
-type GuideRow = Database["public"]["Tables"]["guides"]["Row"];
-type GuideUpdate = Database["public"]["Tables"]["guides"]["Update"];
+type GuideUpdate = Partial<GuideRow>; // ✅ bezpečný typ pro update
 
 export default function GuidesAdminPage() {
   const [guides, setGuides] = useState<GuideRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGuide, setSelectedGuide] = useState<GuideRow | null>(null);
 
-  // ✅ Načtení všech průvodců
   const fetchGuides = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("guides").select("*");
@@ -32,7 +30,6 @@ export default function GuidesAdminPage() {
     fetchGuides();
   }, []);
 
-  // ✅ Schválení nebo zamítnutí průvodce
   const toggleApproval = async (id: string, isApproved: boolean) => {
     const updateData: GuideUpdate = { is_approved: isApproved };
 

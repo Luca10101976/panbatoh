@@ -23,12 +23,22 @@ export default function GuidesPage() {
     const fetchGuides = async () => {
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from("public_published_guides")
-        .select("*")
-        .or(search ? `name.ilike.%${search}%,countries.ilike.%${search}%` : "")
+      let query = supabase.from("public_published_guides").select("*");
+
+      // ✅ Opravený .or() zápis
+      if (search.trim() !== "") {
+        query = query.or(
+          `name.ilike.%${search}%,countries.ilike.%${search}%`,
+          { foreignTable: undefined }
+        );
+      }
+
+      query = query
         .ilike("languages", language ? `%${language}%` : "%")
-        .ilike("experience", experience ? `%${experience}%` : "%");
+        .ilike("experience", experience ? `%${experience}%` : "%")
+        .order("created_at", { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("❌ Chyba při načítání průvodců:", error);

@@ -12,7 +12,6 @@ export async function GET() {
     .select(`
       id,
       name,
-      destination,
       description,
       destination,
       focus,

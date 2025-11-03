@@ -1,6 +1,5 @@
 "use client";
 
-import { use } from "react";
 import { useEffect, useState } from "react";
 import { useRouter, notFound } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
@@ -27,8 +26,8 @@ interface GuideReview {
   created_at?: string | null;
 }
 
-export default function GuidePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: guideId } = use(params);
+export default function GuidePage({ params }: { params: { id: string } }) {
+  const guideId = params.id;
   const router = useRouter();
   const [guide, setGuide] = useState<Guide | null>(null);
   const [reviews, setReviews] = useState<GuideReview[]>([]);
@@ -80,10 +79,9 @@ export default function GuidePage({ params }: { params: Promise<{ id: string }> 
     );
 
   if (!loading && guide === null) {
-    notFound(); // ✅ správná metoda pro Next.js 15
+    notFound(); // zobrazí 404
   }
 
-  // ✅ Funkce pro barevné badge – pevné Tailwind třídy
   const renderBadges = (
     text: string | null,
     type: "languages" | "focus" | "experience"

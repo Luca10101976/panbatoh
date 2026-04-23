@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { createClient } from '@supabase/supabase-js';
 import PrintButton from './PrintButton';
 
 // ── Typy ──────────────────────────────────────────────────────────────────────
@@ -40,13 +41,24 @@ interface GameData {
 
 // ── Načtení dat ───────────────────────────────────────────────────────────────
 async function getGameData(slug: string): Promise<GameData | null> {
+  // Zkus Supabase
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'}/api/hry/${slug}`,
-      { cache: 'no-store' }
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
-    if (!res.ok) return null;
-    return res.json();
+    const { data } = await supabase
+      .from('site_settings')
+      .select('value')
+      .eq('key', `hra_${slug}`)
+      .single();
+    if (data?.value) return data.value as GameData;
+  } catch { /* fallback */ }
+
+  // Fallback na defaultní JSON soubor
+  try {
+    const def = await import(`@/data/hry/${slug}-default.json`);
+    return def.default as GameData;
   } catch {
     return null;
   }

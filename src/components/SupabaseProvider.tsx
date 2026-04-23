@@ -3,28 +3,25 @@
 import {
   createContext,
   useContext,
-  useMemo,
-  useState,
   useEffect,
+  useState,
+  useMemo,
   type ReactNode,
 } from 'react';
-
 import { createBrowserClient } from '@supabase/ssr';
-import { Session, SupabaseClient } from '@supabase/supabase-js';
+import type { Session, SupabaseClient } from '@supabase/supabase-js';
 
-// Typ pro kontext
 type SupabaseContextType = {
   supabase: SupabaseClient;
   session: Session | null;
   loading: boolean;
 };
 
-// Vytvoření kontextu
 const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined);
 
-// Provider obalující aplikaci
 export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [supabase] = useState(() =>
+    // 🔧 moderní způsob – bez storage parametru
     createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -35,13 +32,13 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Získání aktuální session při načtení
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    // 🧠 vyžádá session a uloží ji do state
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
       setLoading(false);
     });
 
-    // Poslouchání změn session (např. přihlášení/odhlášení)
+    // 👂 poslouchá změny přihlášení/odhlášení
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -65,7 +62,6 @@ export function SupabaseAuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// Vlastní hook pro přístup k Supabase
 export function useSupabase() {
   const context = useContext(SupabaseContext);
   if (!context) {
@@ -74,7 +70,6 @@ export function useSupabase() {
   return context;
 }
 
-// Vlastní hook pro práci se session
 export function useAuth() {
   const { session, loading } = useSupabase();
   return { session, user: session?.user, loading };

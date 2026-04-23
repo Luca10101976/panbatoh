@@ -1,3 +1,4 @@
+// src/components/admin/AdminDashboardOverview.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -29,30 +30,44 @@ export default function AdminDashboardOverview() {
     loadData();
   }, []);
 
-  if (loading) return <p>⏳ Načítám přehled…</p>;
-  if (!counts) return <p>Nelze načíst počty.</p>;
+  if (loading) return <p>Načítám přehled…</p>;
+  if (!counts) return <p>Nepodařilo se načíst data.</p>;
+
+  const { guides, itineraries, reviews, photos } = counts;
 
   return (
-    <div className="grid grid-cols-2 gap-6 mt-6">
-      <Link href="/admin/guides" className="p-6 border rounded shadow hover:bg-gray-50">
-        <h2 className="text-xl font-bold">Průvodci</h2>
-        <p className="text-2xl">{counts.guides}</p>
-      </Link>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition">
+        <h3 className="text-sm text-gray-500">Průvodci</h3>
+        <p className="text-3xl font-bold mt-2">{guides}</p>
+        <Link href="/admin/guides" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
+          Zobrazit
+        </Link>
+      </div>
 
-      <Link href="/admin/itineraries" className="p-6 border rounded shadow hover:bg-gray-50">
-        <h2 className="text-xl font-bold">Itineráře</h2>
-        <p className="text-2xl">{counts.itineraries}</p>
-      </Link>
+      <div className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition">
+        <h3 className="text-sm text-gray-500">Itineráře</h3>
+        <p className="text-3xl font-bold mt-2">{itineraries}</p>
+        <Link href="/admin/itineraries" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
+          Zobrazit
+        </Link>
+      </div>
 
-      <Link href="/admin/reviews" className="p-6 border rounded shadow hover:bg-gray-50">
-        <h2 className="text-xl font-bold">Recenze</h2>
-        <p className="text-2xl">{counts.reviews}</p>
-      </Link>
+      <div className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition">
+        <h3 className="text-sm text-gray-500">Recenze</h3>
+        <p className="text-3xl font-bold mt-2">{reviews}</p>
+        <Link href="/admin/reviews" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
+          Zobrazit
+        </Link>
+      </div>
 
-      <Link href="/admin/photos" className="p-6 border rounded shadow hover:bg-gray-50">
-        <h2 className="text-xl font-bold">Fotky</h2>
-        <p className="text-2xl">{counts.photos}</p>
-      </Link>
+      <div className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition">
+        <h3 className="text-sm text-gray-500">Fotky</h3>
+        <p className="text-3xl font-bold mt-2">{photos}</p>
+        <Link href="/admin/photos" className="text-sm text-blue-600 hover:underline mt-1 inline-block">
+          Zobrazit
+        </Link>
+      </div>
     </div>
   );
 }

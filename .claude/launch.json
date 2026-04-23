@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "panbatoh-admin (Next.js dev)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "fakturacesoused",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/lucielejnarova/fakturacesoused", "run", "dev"],
+      "port": 3001
+    }
+  ]
+}

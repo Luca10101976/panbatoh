@@ -17,6 +17,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    // ✅ Přihlášení uživatele (aktuální API)
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -26,15 +27,21 @@ export default function LoginPage() {
 
     if (error) {
       setError(error.message);
-    } else {
-      const userEmail = data.user?.email ?? "";
+      return;
+    }
 
-      const adminEmails = ["lejnarova.lucie@gmail.com"]; // ⬅️ zde můžeš přidat další adminy
-      if (adminEmails.includes(userEmail)) {
-        router.push("/admin");
-      } else {
-        router.push("/guide/dashboard");
-      }
+    // ✅ Spuštění auto-refresh mechanizmu,
+    // který nastaví httpOnly cookie pro middleware
+    await supabase.auth.startAutoRefresh();
+
+    // ✅ Přesměrování podle role
+    const userEmail = data.user?.email ?? "";
+    const adminEmails = ["zabaleny@panbatoh.cz"];
+
+    if (adminEmails.includes(userEmail)) {
+      router.push("/admin");
+    } else {
+      router.push("/guide/dashboard");
     }
   };
 

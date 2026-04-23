@@ -1,7 +1,7 @@
 "use client";
 
+import { useParams, notFound } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRouter, notFound } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
 interface Guide {
@@ -26,20 +26,21 @@ interface GuideReview {
   created_at?: string | null;
 }
 
-export default function GuidePage({ params }: { params: { id: string } }) {
-  const guideId = params.id;
-  const router = useRouter();
+export default function GuidePage() {
+  const params = useParams();
+  const guideId = typeof params.id === "string" ? params.id : "";
+
   const [guide, setGuide] = useState<Guide | null>(null);
   const [reviews, setReviews] = useState<GuideReview[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!guideId) return;
+
     const fetchData = async () => {
       const { data, error } = await supabase
         .from("public_published_guides")
-        .select(
-          "id, name, countries, languages, profile_image, description, experience, focus, created_at, rating"
-        )
+        .select("*")
         .eq("id", guideId)
         .single();
 
@@ -50,13 +51,11 @@ export default function GuidePage({ params }: { params: { id: string } }) {
         return;
       }
 
-      setGuide(data as unknown as Guide);
+      setGuide(data);
 
       const { data: reviewsData, error: reviewsError } = await supabase
         .from("reviews")
-        .select(
-          "id, content, rating, user_id, guide_id, created_at"
-        )
+        .select("*")
         .eq("guide_id", guideId)
         .order("created_at", { ascending: false });
 
@@ -69,7 +68,7 @@ export default function GuidePage({ params }: { params: { id: string } }) {
     };
 
     fetchData();
-  }, [guideId, router]);
+  }, [guideId]);
 
   if (loading)
     return (
@@ -79,7 +78,7 @@ export default function GuidePage({ params }: { params: { id: string } }) {
     );
 
   if (!loading && guide === null) {
-    notFound(); // zobrazí 404
+    notFound();
   }
 
   const renderBadges = (
@@ -130,10 +129,10 @@ export default function GuidePage({ params }: { params: { id: string } }) {
         </p>
       </div>
 
-      {/* O PRŮVODCI */}
+      {/* PÁR SLOV O SOBĚ */}
       <section className="mb-10 bg-[#f9fafb] rounded-xl p-6 shadow-sm border border-gray-100">
         <h2 className="text-xl font-semibold text-[#023047] mb-3">
-          O průvodci
+          Pár slov o sobě
         </h2>
         <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
           {guide.description || "Průvodce zatím nic nenapsal."}
@@ -163,14 +162,14 @@ export default function GuidePage({ params }: { params: { id: string } }) {
 
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-              Typy zážitků
+              Specializace
             </h3>
             <div>{renderBadges(guide.experience, "experience")}</div>
           </div>
 
           <div>
             <h3 className="text-sm font-medium text-gray-500 mb-2 uppercase tracking-wide">
-              Hodnocení
+              Recenze
             </h3>
             <p className="text-gray-900 font-semibold">
               {guide.rating

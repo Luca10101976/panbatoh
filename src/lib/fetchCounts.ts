@@ -1,3 +1,4 @@
+// src/lib/fetchCounts.ts
 import { supabase } from "./supabaseClient";
 import { PostgrestError } from "@supabase/supabase-js";
 
@@ -9,27 +10,36 @@ type CountResponse = {
   statusText: string;
 };
 
+// Povolené admin view – přesné literály kvůli TS typování
+type AdminTable =
+  | "admin_guides"
+  | "admin_itineraries"
+  | "admin_reviews"
+  | "admin_guide_photos";
+
 export const fetchCounts = async () => {
-  const guides = await supabase
-    .from("guides")
-    .select("id", { head: true, count: "exact" }) as CountResponse;
+  const tables: AdminTable[] = [
+    "admin_guides",
+    "admin_itineraries",
+    "admin_reviews",
+    "admin_guide_photos",
+  ];
 
-  const itineraries = await supabase
-    .from("itineraries")
-    .select("id", { head: true, count: "exact" }) as CountResponse;
+  const getCount = async (table: AdminTable): Promise<number> => {
+    const { count, error } = (await supabase
+      .from(table)
+      .select("id", { head: true, count: "exact" })) as CountResponse;
 
-  const reviews = await supabase
-    .from("reviews")
-    .select("id", { head: true, count: "exact" }) as CountResponse;
-
-  const photos = await supabase
-    .from("itinerary_day_photos")
-    .select("id", { head: true, count: "exact" }) as CountResponse;
-
-  return {
-    guides: guides.count ?? 0,
-    itineraries: itineraries.count ?? 0,
-    reviews: reviews.count ?? 0,
-    photos: photos.count ?? 0,
+    if (error) {
+      console.error(`Chyba při čtení z ${table}:`, error);
+      return 0;
+    }
+    return count ?? 0;
   };
+
+  const [guides, itineraries, reviews, photos] = await Promise.all(
+    tables.map((t) => getCount(t))
+  );
+
+  return { guides, itineraries, reviews, photos };
 };

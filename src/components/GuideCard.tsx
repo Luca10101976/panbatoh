@@ -6,9 +6,9 @@ import Image from "next/image";
 type Props = {
   id: string;
   name: string;
-  countries: string | string[]; // ✅ umí obě varianty
+  countries: string | string[];
   experience: string;
-  focus: string; // ✅ přidáno
+  focus: string;
   description: string;
   imageUrl: string;
   languages: string;
@@ -28,7 +28,7 @@ export default function GuideCard({
 }: Props) {
   const safeImageUrl = imageUrl?.trim() || "/panbatoh-logo.png";
 
-  const renderInlineList = (label: string, value: string | string[]) => {
+  const renderInlineList = (value: string | string[]) => {
     const items = Array.isArray(value)
       ? value
       : value
@@ -36,56 +36,46 @@ export default function GuideCard({
           .map((item) => item.trim())
           .filter((item) => item.length > 0);
 
-    return (
-      <p className="text-sm text-gray-700 mt-1 w-full text-left">
-        <strong>{label}:</strong>{" "}
-        {items && items.length > 0
-          ? items.map((item, idx) => (
-              <span key={idx}>
-                {idx > 0 && " • "}
-                {item}
-              </span>
-            ))
-          : "Neuvedeno"}
-      </p>
-    );
+    return items && items.length > 0 ? items.join(", ") : "neuvedeno";
   };
 
   return (
     <Link
       href={`/pruvodci/${id}`}
-      className="flex flex-col items-center text-center bg-white border border-[#8ECAE6] rounded-2xl shadow hover:shadow-lg transition p-6"
+      className="flex flex-col bg-white border border-[#8ECAE6] rounded-2xl shadow hover:shadow-lg transition p-6 text-left hover:scale-[1.01]"
     >
-      <div className="w-24 h-24 relative mb-3 rounded-full overflow-hidden border-2 border-[#8ECAE6]">
+      <div className="w-full h-48 relative mb-4 rounded-xl overflow-hidden">
         <Image
           src={safeImageUrl}
           alt={name || "Průvodce"}
           fill
-          sizes="96px"
+          sizes="100%"
           unoptimized
-          className="rounded-full object-cover"
+          className="object-cover"
         />
       </div>
 
-      <h3 className="text-lg font-bold text-[#0077B6] mb-1">
-        {name || "Neznámý průvodce"}
-      </h3>
+      <h3 className="text-xl font-bold text-[#023047] mb-1">{name}</h3>
 
-      {renderInlineList("Země", countries)}
-      {renderInlineList("Zaměření", experience)}
-      {renderInlineList("Specializace", focus)}
-
-      <p className="text-sm text-yellow-600 mt-1 w-full text-left">
-        <strong>Recenze:</strong>{" "}
-        {typeof rating === "number"
-          ? `${rating.toFixed(1)} / 5 ⭐`
-          : "Zatím bez hodnocení"}
+      <p className="text-gray-600 text-sm mb-1">
+        <strong>Země:</strong> {renderInlineList(countries)}
       </p>
-
-      {renderInlineList("Jazyky", languages)}
-
-      <p className="text-sm text-gray-500 mt-2 w-full text-left line-clamp-2">
-        <strong>Pár slov o sobě:</strong> {description || "Bez popisu"}
+      <p className="text-gray-600 text-sm mb-1">
+        <strong>Zaměření:</strong> {renderInlineList(experience)}
+      </p>
+      <p className="text-gray-600 text-sm mb-1">
+        <strong>Specializace:</strong> {renderInlineList(focus)}
+      </p>
+      <p className="text-yellow-700 text-sm mb-1">
+        <strong>Recenze:</strong>{" "}
+        {rating ? `${rating.toFixed(1)} / 5 ⭐` : "Zatím bez hodnocení"}
+      </p>
+      <p className="text-gray-600 text-sm mb-1">
+        <strong>Jazyky:</strong> {renderInlineList(languages)}
+      </p>
+      <p className="text-gray-500 text-sm mt-2">
+        <strong>Pár slov o sobě:</strong>{" "}
+        {description?.trim() || "Bez popisu"}
       </p>
     </Link>
   );
